@@ -1,0 +1,47 @@
+
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
+import NotFound from "./pages/NotFound";
+import UserDashboard from "./pages/dashboard/UserDashboard";
+import CharityDashboard from "./pages/dashboard/CharityDashboard";
+import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import CharitiesList from "./pages/charities/CharitiesList";
+import CharityProfile from "./pages/charities/CharityProfile";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+
+// Create a client for TanStack Query
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/charities" element={<CharitiesList />} />
+          <Route path="/charities/:id" element={<CharityProfile />} />
+          <Route path="/dashboard/user" element={<UserDashboard />} />
+          <Route path="/dashboard/charity" element={<CharityDashboard />} />
+          <Route path="/dashboard/admin" element={<AdminDashboard />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+export default App;
