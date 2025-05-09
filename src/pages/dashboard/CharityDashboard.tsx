@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
+import 'react-slideshow-image/dist/styles.css'
+import { Slide } from 'react-slideshow-image';
 import MainLayout from '@/components/layout/MainLayout';
 import {
   Table,
@@ -14,6 +16,8 @@ import {
 } from "@/components/ui/table";
 import { Eye, Edit, Trash, Plus, Check, X, MapPin } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
+import { Slider } from '@radix-ui/react-slider';
+import { Carousel } from '@/components/ui/carousel';
 
 const CharityDashboard = () => {
   const [profileData, setProfileData] = useState({
@@ -23,6 +27,7 @@ const CharityDashboard = () => {
     address: '123 Charity St, Anytown, CA 94103',
     description: 'We provide emergency assistance, disaster relief, and education in our local community.',
     profileImage: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?auto=format&fit=crop&q=80&w=256&h=256',
+    wallpaperImage: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?auto=format&fit=crop&q=80&w=256&h=256',
     socialLinks: {
       website: 'https://example.org',
       facebook: 'https://facebook.com',
@@ -53,23 +58,23 @@ const CharityDashboard = () => {
 
   // Sample data for posts
   const [posts, setPosts] = useState([
-    { 
-      id: 1, 
-      content: 'We just completed our annual food drive! Thanks to all who contributed - we collected over 1000 pounds of food for local families.', 
+    {
+      id: 1,
+      content: 'We just completed our annual food drive! Thanks to all who contributed - we collected over 1000 pounds of food for local families.',
       date: '2023-05-10',
-      image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=500'
+      images: ['https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=500', "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80&w=500", "/cover.png"]
     },
-    { 
-      id: 2, 
-      content: 'Our volunteers spent the weekend rebuilding homes affected by the recent floods. Proud of our team!', 
+    {
+      id: 2,
+      content: 'Our volunteers spent the weekend rebuilding homes affected by the recent floods. Proud of our team!',
       date: '2023-05-05',
-      image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80&w=500'
+      images: ['https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80&w=500']
     }
   ]);
 
   const [newPost, setNewPost] = useState({
     content: '',
-    image: null
+    images: null
   });
 
   const handleProfileUpdate = (e: React.FormEvent) => {
@@ -113,10 +118,10 @@ const CharityDashboard = () => {
         id: posts.length + 1,
         content: newPost.content,
         date: new Date().toISOString().split('T')[0],
-        image: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&q=80&w=500'
+        images: ['https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&q=80&w=500']
       };
       setPosts([post, ...posts]);
-      setNewPost({ content: '', image: null });
+      setNewPost({ content: '', images: null });
     }
   };
 
@@ -140,16 +145,16 @@ const CharityDashboard = () => {
       <div className="bg-hope-gray py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold text-hope-dark-gray mb-6">Charity Dashboard</h1>
-          
+
           <Tabs defaultValue="profile">
-            <TabsList className="mb-8 bg-white">
+            <TabsList className="mb-8 bg-white flex justify-around">
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="branches">Branches</TabsTrigger>
               <TabsTrigger value="donations">Donation Requests</TabsTrigger>
               <TabsTrigger value="help">Help Requests</TabsTrigger>
               <TabsTrigger value="posts">Posts</TabsTrigger>
             </TabsList>
-            
+
             {/* Profile Tab */}
             <TabsContent value="profile">
               <div className="grid md:grid-cols-3 gap-8">
@@ -159,8 +164,8 @@ const CharityDashboard = () => {
                   </CardHeader>
                   <CardContent className="flex flex-col items-center">
                     <div className="w-48 h-48 rounded-full overflow-hidden mb-6">
-                      <img 
-                        src={profileData.profileImage} 
+                      <img
+                        src={profileData.profileImage}
                         alt="Charity Logo"
                         className="w-full h-full object-cover"
                       />
@@ -169,8 +174,23 @@ const CharityDashboard = () => {
                       Change Logo
                     </Button>
                   </CardContent>
+                  <CardHeader>
+                    <CardTitle>Charity Wallpaper</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="w-full h-48 rounded-lg mb-6">
+                      <img
+                        src={profileData.wallpaperImage}
+                        alt="Charity Logo"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <Button className="bg-hope-orange hover:bg-hope-dark-orange w-full">
+                      Change Wallpaper
+                    </Button>
+                  </CardContent>
                 </Card>
-                
+
                 <Card className="md:col-span-2">
                   <CardHeader>
                     <CardTitle>Charity Information</CardTitle>
@@ -180,103 +200,67 @@ const CharityDashboard = () => {
                     <form onSubmit={handleProfileUpdate} className="space-y-5">
                       <div>
                         <label htmlFor="name" className="block mb-1 text-sm font-medium">Charity Name</label>
-                        <input 
-                          id="name" 
-                          type="text" 
+                        <input
+                          id="name"
+                          type="text"
                           value={profileData.name}
-                          onChange={e => setProfileData({...profileData, name: e.target.value})}
+                          onChange={e => setProfileData({ ...profileData, name: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</label>
-                        <input 
-                          id="email" 
-                          type="email" 
+                        <input
+                          id="email"
+                          type="email"
                           value={profileData.email}
-                          onChange={e => setProfileData({...profileData, email: e.target.value})}
+                          onChange={e => setProfileData({ ...profileData, email: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="phone" className="block mb-1 text-sm font-medium">Phone Number</label>
-                        <input 
-                          id="phone" 
-                          type="tel" 
+                        <input
+                          id="phone"
+                          type="tel"
                           value={profileData.phone}
-                          onChange={e => setProfileData({...profileData, phone: e.target.value})}
+                          onChange={e => setProfileData({ ...profileData, phone: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="address" className="block mb-1 text-sm font-medium">Main Address</label>
-                        <textarea 
-                          id="address" 
+                        <textarea
+                          id="address"
                           rows={2}
                           value={profileData.address}
-                          onChange={e => setProfileData({...profileData, address: e.target.value})}
+                          onChange={e => setProfileData({ ...profileData, address: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         ></textarea>
                       </div>
-                      
+
                       <div>
                         <label htmlFor="description" className="block mb-1 text-sm font-medium">Description</label>
-                        <textarea 
-                          id="description" 
+                        <textarea
+                          id="description"
                           rows={4}
                           value={profileData.description}
-                          onChange={e => setProfileData({...profileData, description: e.target.value})}
+                          onChange={e => setProfileData({ ...profileData, description: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         ></textarea>
                       </div>
-                      
-                      <div className="grid md:grid-cols-3 gap-4">
-                        <div>
-                          <label htmlFor="website" className="block mb-1 text-sm font-medium">Website</label>
-                          <input 
-                            id="website" 
-                            type="url" 
-                            value={profileData.socialLinks.website}
-                            onChange={e => setProfileData({
-                              ...profileData, 
-                              socialLinks: {...profileData.socialLinks, website: e.target.value}
-                            })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="facebook" className="block mb-1 text-sm font-medium">Facebook</label>
-                          <input 
-                            id="facebook" 
-                            type="url" 
-                            value={profileData.socialLinks.facebook}
-                            onChange={e => setProfileData({
-                              ...profileData, 
-                              socialLinks: {...profileData.socialLinks, facebook: e.target.value}
-                            })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="twitter" className="block mb-1 text-sm font-medium">Twitter</label>
-                          <input 
-                            id="twitter" 
-                            type="url" 
-                            value={profileData.socialLinks.twitter}
-                            onChange={e => setProfileData({
-                              ...profileData, 
-                              socialLinks: {...profileData.socialLinks, twitter: e.target.value}
-                            })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
+
+                      <div className='w-full justify-end flex'>
+                        <Button variant='outline' className="hover:bg-hope-orange hover:text-white border-hope-orange bg-white border-2 text-black gap-1">
+                          Change Password
+                        </Button>
                       </div>
-                      
-                      <div>
-                        <Button type="submit" className="bg-hope-orange hover:bg-hope-dark-orange">
+
+                      <div className='w-full border-t border-gray-300 pt-5 flex justify-center'>
+                        <Button type="submit" className="px-20 bg-hope-orange hover:bg-hope-dark-orange">
                           Save Changes
                         </Button>
                       </div>
@@ -285,7 +269,7 @@ const CharityDashboard = () => {
                 </Card>
               </div>
             </TabsContent>
-            
+
             {/* Branches Tab */}
             <TabsContent value="branches">
               <Card>
@@ -324,9 +308,6 @@ const CharityDashboard = () => {
                             <div>
                               <strong className="text-sm">Phone:</strong> {branch.phone}
                             </div>
-                            <div>
-                              <strong className="text-sm">Working Hours:</strong> {branch.workHours}
-                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -335,7 +316,7 @@ const CharityDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             {/* Donation Requests Tab */}
             <TabsContent value="donations">
               <Card>
@@ -374,16 +355,16 @@ const CharityDashboard = () => {
                               </Button>
                               {request.status === 'Pending' && (
                                 <>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
                                     onClick={() => handleDonationAction(request.id, 'approve')}
                                     className="text-green-500 hover:text-green-700"
                                   >
                                     <Check className="h-4 w-4" />
                                   </Button>
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
                                     onClick={() => handleDonationAction(request.id, 'decline')}
                                     className="text-red-500 hover:text-red-700"
@@ -401,7 +382,7 @@ const CharityDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             {/* Help Requests Tab */}
             <TabsContent value="help">
               <Card>
@@ -440,16 +421,16 @@ const CharityDashboard = () => {
                               </Button>
                               {request.status === 'Pending' && (
                                 <>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
                                     onClick={() => handleHelpRequestAction(request.id, 'approve')}
                                     className="text-green-500 hover:text-green-700"
                                   >
                                     <Check className="h-4 w-4" />
                                   </Button>
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
                                     onClick={() => handleHelpRequestAction(request.id, 'decline')}
                                     className="text-red-500 hover:text-red-700"
@@ -467,7 +448,7 @@ const CharityDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             {/* Posts Tab */}
             <TabsContent value="posts">
               <Card>
@@ -476,20 +457,20 @@ const CharityDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleAddPost} className="space-y-4">
-                    <Textarea 
+                    <Textarea
                       placeholder="What would you like to share with your supporters?"
                       value={newPost.content}
-                      onChange={(e) => setNewPost({...newPost, content: e.target.value})}
+                      onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                       className="min-h-32"
                     />
                     <div className="flex items-center gap-4">
-                      <Button 
-                        type="button" 
+                      <Button
+                        type="button"
                         variant="outline"
                       >
                         Add Photo
                       </Button>
-                      <Button 
+                      <Button
                         type="submit"
                         className="bg-hope-orange hover:bg-hope-dark-orange"
                         disabled={!newPost.content.trim()}
@@ -500,18 +481,18 @@ const CharityDashboard = () => {
                   </form>
                 </CardContent>
               </Card>
-              
+
               <div className="mt-8 space-y-6">
                 <h3 className="text-xl font-semibold">Your Posts</h3>
-                
+
                 {posts.map((post) => (
                   <Card key={post.id}>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full overflow-hidden">
-                            <img 
-                              src={profileData.profileImage} 
+                            <img
+                              src={profileData.profileImage}
                               alt={profileData.name}
                               className="w-full h-full object-cover"
                             />
@@ -525,9 +506,9 @@ const CharityDashboard = () => {
                           <Button variant="ghost" size="icon" className="h-8 w-8">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-red-500"
                             onClick={() => handleDeletePost(post.id)}
                           >
@@ -538,15 +519,25 @@ const CharityDashboard = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="mb-4">{post.content}</p>
-                      {post.image && (
-                        <div className="rounded-lg overflow-hidden">
-                          <img 
-                            src={post.image}
-                            alt="Post attachment"
-                            className="w-full h-auto"
-                          />
+                      {post.images.length === 3 ?
+                        <div className="slide-container">
+                          <Slide slidesToShow={2}>
+                            {post.images.map((url, index) => (
+                              <div key={index} className='w-full flex justify-center h-full'>
+                                <img draggable={false} src={url} alt="" className='object-cover' />
+                              </div>
+                            ))}
+                          </Slide>
                         </div>
-                      )}
+                        :
+                        <>
+                          <img
+                            src={post.images[0]}
+                            alt="Post attachment"
+                            className='w-full max-h-[30rem] object-cover'
+                          />
+                        </>
+                      }
                     </CardContent>
                   </Card>
                 ))}

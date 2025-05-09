@@ -3,24 +3,35 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Heart, Menu, X, Search } from 'lucide-react';
-import { 
+import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import Icon from '../ui/icon';
+import { Switch } from '../ui/switch';
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-  
+  const [menuOpen, setMenuOpen] = useState(false);
+  function ChangeMenuState() {
+    setMenuOpen(menuOpen ? false : true)
+  }
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
+      <div className="w-full flex justify-center py-5 gap-2">
+        <label htmlFor="loginSwitch">Login</label>
+        <Switch id='loginSwitch' onClick={() => setIsLoggedIn(!isLoggedIn)} />
+      </div>
       <div className="container mx-auto flex justify-between items-center py-3 px-4">
         <Link to="/" className="flex items-center gap-2 text-hope-orange">
-          <Heart className="h-6 w-6 fill-hope-orange stroke-hope-orange" />
+          <Icon size={8}></Icon>
           <span className="font-bold text-xl md:text-2xl">HopeGivers</span>
         </Link>
-        
+
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <Link to="/" className="text-hope-dark-gray hover:text-hope-orange transition-colors">
@@ -32,11 +43,8 @@ const Header = () => {
           <Link to="/about" className="text-hope-dark-gray hover:text-hope-orange transition-colors">
             About
           </Link>
-          <Link to="/contact" className="text-hope-dark-gray hover:text-hope-orange transition-colors">
-            Contact
-          </Link>
         </nav>
-        
+
         <div className="hidden md:flex items-center gap-3">
           <div className="relative">
             <input
@@ -46,17 +54,17 @@ const Header = () => {
             />
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
           </div>
-          
+
           {!isLoggedIn ? (
             <>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => navigate('/login')}
                 className="text-hope-dark-gray hover:text-hope-orange hover:bg-hope-gray"
               >
                 Sign In
               </Button>
-              <Button 
+              <Button
                 onClick={() => navigate('/signup')}
                 className="bg-hope-orange hover:bg-hope-dark-orange text-white"
               >
@@ -64,15 +72,23 @@ const Header = () => {
               </Button>
             </>
           ) : (
-            <Button 
-              onClick={() => navigate('/dashboard')}
-              className="bg-hope-orange hover:bg-hope-dark-orange text-white"
-            >
-              Dashboard
-            </Button>
+            <DropdownMenu open={menuOpen} onOpenChange={ChangeMenuState} >
+              <DropdownMenuTrigger className="bg-hope-orange hover:bg-hope-dark-orange text-white px-3 py-1 rounded-lg focus:outline-none">Dashboard</DropdownMenuTrigger>
+              <DropdownMenuContent className='flex flex-col'>
+                <Link to="/dashboard/user" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
+                  User
+                </Link>
+                <Link to="/dashboard/charity" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
+                  Charity
+                </Link>
+                <Link to="/dashboard/admin" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
+                  Admin
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
-        
+
         {/* Mobile Navigation */}
         <div className="md:hidden flex items-center gap-2">
           <Sheet>
@@ -93,20 +109,17 @@ const Header = () => {
                 <Link to="/about" className="text-xl font-medium hover:text-hope-orange transition-colors">
                   About
                 </Link>
-                <Link to="/contact" className="text-xl font-medium hover:text-hope-orange transition-colors">
-                  Contact
-                </Link>
                 <div className="border-t pt-6 mt-2">
                   {!isLoggedIn ? (
                     <div className="flex flex-col gap-3">
-                      <Button 
+                      <Button
                         onClick={() => navigate('/login')}
                         variant="outline"
                         className="w-full"
                       >
                         Sign In
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => navigate('/signup')}
                         className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white"
                       >
@@ -114,12 +127,20 @@ const Header = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Button 
-                      onClick={() => navigate('/dashboard')}
-                      className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white"
-                    >
-                      Dashboard
-                    </Button>
+                    <DropdownMenu open={menuOpen} onOpenChange={ChangeMenuState} >
+                      <DropdownMenuTrigger className="bg-hope-orange hover:bg-hope-dark-orange text-white px-3 py-1 rounded-lg focus:outline-none">Dashboard</DropdownMenuTrigger>
+                      <DropdownMenuContent className='flex flex-col'>
+                        <Link to="/dashboard/user" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
+                          User
+                        </Link>
+                        <Link to="/dashboard/charity" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
+                          Charity
+                        </Link>
+                        <Link to="/dashboard/admin" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
+                          Admin
+                        </Link>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
               </div>

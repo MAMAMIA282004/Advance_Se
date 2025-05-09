@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/components/layout/MainLayout';
-import { Heart, Phone, Mail, Globe, Clock, MapPin, Send, DollarSign } from 'lucide-react';
+import { Heart, Phone, Mail, MapPin, Send, DollarSign } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 
 // Mock charity data
@@ -12,35 +12,26 @@ const charityData = {
   id: 1,
   name: 'Red Cross Local Chapter',
   logo: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?auto=format&fit=crop&q=80&w=150&h=150',
-  coverImage: 'https://images.unsplash.com/photo-1488521787991-ed7bbafc3c3a?auto=format&fit=crop&q=80&w=1470&h=400',
+  coverImage: '/cover.png',
   description: 'We provide emergency assistance, disaster relief, and education in our local community. Our mission is to prevent and alleviate human suffering in the face of emergencies by mobilizing the power of volunteers and the generosity of donors.',
   category: 'Disaster Relief',
   location: 'San Francisco, CA',
   contactInfo: {
     email: 'info@redcross-local.org',
     phone: '+1 (123) 456-7890',
-    website: 'www.redcross-local.org',
-    workHours: 'Mon-Fri: 9 AM - 5 PM',
-    socialMedia: {
-      facebook: 'https://facebook.com',
-      twitter: 'https://twitter.com',
-      instagram: 'https://instagram.com'
-    }
   },
   branches: [
-    { 
-      id: 1, 
-      name: 'Downtown Office', 
-      address: '123 Main St, San Francisco, CA 94105', 
-      phone: '+1 (123) 456-7890', 
-      workHours: '9 AM - 5 PM' 
+    {
+      id: 1,
+      name: 'Downtown Office',
+      address: '123 Main St, San Francisco, CA 94105',
+      phone: '+1 (123) 456-7890',
     },
-    { 
-      id: 2, 
-      name: 'West Side Branch', 
-      address: '456 West Ave, San Francisco, CA 94116', 
-      phone: '+1 (123) 123-4567', 
-      workHours: '8 AM - 4 PM' 
+    {
+      id: 2,
+      name: 'West Side Branch',
+      address: '456 West Ave, San Francisco, CA 94116',
+      phone: '+1 (123) 123-4567',
     },
   ],
   posts: [
@@ -72,7 +63,7 @@ const CharityProfile = () => {
   const [newComment, setNewComment] = useState('');
   const [donationAmount, setDonationAmount] = useState<number | ''>('');
   const [isCommenting, setIsCommenting] = useState<Record<number, boolean>>({});
-  
+
   // Donation form fields
   const [donationForm, setDonationForm] = useState({
     name: '',
@@ -82,7 +73,7 @@ const CharityProfile = () => {
     itemDescription: '',
     image: null
   });
-  
+
   // Help request form fields
   const [helpForm, setHelpForm] = useState({
     name: '',
@@ -99,7 +90,7 @@ const CharityProfile = () => {
       // In a real app, you'd send this to an API
       alert(`Comment added: "${newComment}"`);
       setNewComment('');
-      setIsCommenting({...isCommenting, [postId]: false});
+      setIsCommenting({ ...isCommenting, [postId]: false });
     }
   };
 
@@ -125,7 +116,7 @@ const CharityProfile = () => {
   };
 
   const toggleComment = (postId: number) => {
-    setIsCommenting({...isCommenting, [postId]: !isCommenting[postId]});
+    setIsCommenting({ ...isCommenting, [postId]: !isCommenting[postId] });
   };
 
   return (
@@ -133,51 +124,38 @@ const CharityProfile = () => {
       {/* Cover Image & Basic Info */}
       <div className="relative">
         <div className="h-64 md:h-80 w-full overflow-hidden">
-          <img 
+          <img
             src={charity.coverImage}
             alt={`${charity.name} cover`}
             className="w-full h-full object-cover"
           />
         </div>
-        
+
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-end relative -mt-16 md:-mt-24">
-            <div className="bg-white rounded-xl shadow-md p-4 md:p-6 flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-8">
-              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-sm">
-                <img 
+          <div className="flex flex-col md:flex-row justify-center relative -mt-44">
+            <div className="rounded-xl p-4 md:p-6 flex flex-col items-center gap-4 md:gap-8">
+              <div className="w-48 h-48 rounded-full overflow-hidden">
+                <img
                   src={charity.logo}
                   alt={charity.name}
                   className="w-full h-full object-cover"
                 />
               </div>
-              
+
               <div className="text-center md:text-left">
                 <h1 className="text-2xl md:text-3xl font-bold text-hope-dark-gray">{charity.name}</h1>
-                <p className="text-gray-500 flex justify-center md:justify-start items-center gap-1 mt-1">
-                  <MapPin className="h-4 w-4" /> {charity.location}
-                </p>
               </div>
-              
-              <div className="ml-auto hidden md:block">
-                <Button className="bg-hope-orange hover:bg-hope-dark-orange">
-                  <Heart className="mr-2 h-4 w-4 fill-white" /> Follow Charity
-                </Button>
-              </div>
-            </div>
-            <div className="md:hidden mt-4 w-full">
-              <Button className="bg-hope-orange hover:bg-hope-dark-orange w-full">
-                <Heart className="mr-2 h-4 w-4 fill-white" /> Follow Charity
-              </Button>
+
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Tabs Section */}
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="home">
           <div className="border-b">
-            <TabsList className="bg-transparent h-auto mb-0">
+            <TabsList className="bg-transparent justify-evenly h-auto mb-0 w-full">
               <TabsTrigger value="home" className="rounded-none border-b-2 border-transparent data-[state=active]:border-hope-orange data-[state=active]:bg-transparent">
                 Home
               </TabsTrigger>
@@ -192,17 +170,17 @@ const CharityProfile = () => {
               </TabsTrigger>
             </TabsList>
           </div>
-          
+
           {/* Home Tab Content */}
           <TabsContent value="home">
-            <div className="grid md:grid-cols-3 gap-8 mt-8">
+            <div className="grid md:grid-cols-1 gap-8 mt-8">
               {/* Left Column - About */}
-              <div className="md:col-span-1">
+              <div>
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="p-6">
                     <h2 className="text-xl font-semibold mb-4">About Us</h2>
                     <p className="text-gray-700">{charity.description}</p>
-                    
+
                     <div className="mt-6 space-y-3">
                       <div className="flex items-start gap-3">
                         <Mail className="h-5 w-5 text-hope-orange mt-0.5" />
@@ -211,7 +189,7 @@ const CharityProfile = () => {
                           <p className="text-gray-600">{charity.contactInfo.email}</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-start gap-3">
                         <Phone className="h-5 w-5 text-hope-orange mt-0.5" />
                         <div>
@@ -219,45 +197,29 @@ const CharityProfile = () => {
                           <p className="text-gray-600">{charity.contactInfo.phone}</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-start gap-3">
-                        <Globe className="h-5 w-5 text-hope-orange mt-0.5" />
+                        <MapPin className="h-5 w-5 text-hope-orange mt-0.5" />
                         <div>
-                          <p className="font-medium">Website</p>
-                          <a 
-                            href={`https://${charity.contactInfo.website}`} 
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-hope-orange hover:underline"
-                          >
-                            {charity.contactInfo.website}
-                          </a>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-3">
-                        <Clock className="h-5 w-5 text-hope-orange mt-0.5" />
-                        <div>
-                          <p className="font-medium">Working Hours</p>
-                          <p className="text-gray-600">{charity.contactInfo.workHours}</p>
+                          <p className="font-medium">Address</p>
+                          <p className="text-gray-600">{charity.location}</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               {/* Right Column - Posts */}
-              <div className="md:col-span-2">
-                <h2 className="text-xl font-semibold mb-4">Recent Updates</h2>
-                
+              <div>
+
                 {charity.posts.map((post) => (
                   <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                     <div className="p-6">
                       <div className="flex items-center mb-4">
                         <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
-                          <img 
-                            src={charity.logo} 
+                          <img
+                            src={charity.logo}
                             alt={charity.name}
                             className="w-full h-full object-cover"
                           />
@@ -267,19 +229,19 @@ const CharityProfile = () => {
                           <p className="text-xs text-gray-500">{post.date}</p>
                         </div>
                       </div>
-                      
+
                       <p className="mb-4">{post.content}</p>
-                      
+
                       {post.image && (
                         <div className="rounded-lg overflow-hidden mb-4">
-                          <img 
+                          <img
                             src={post.image}
                             alt="Post attachment"
                             className="w-full h-auto"
                           />
                         </div>
                       )}
-                      
+
                       <div className="flex justify-between items-center mt-2">
                         <Button
                           variant="outline"
@@ -288,15 +250,15 @@ const CharityProfile = () => {
                         >
                           {post.comments.length > 0 ? `Comments (${post.comments.length})` : "Add Comment"}
                         </Button>
-                        
-                        <Button 
-                          variant="outline" 
+
+                        <Button
+                          variant="outline"
                           className="text-red-500"
                         >
                           Report
                         </Button>
                       </div>
-                      
+
                       {/* Comment Section */}
                       {(post.comments.length > 0 || isCommenting[post.id]) && (
                         <div className="mt-4 pt-4 border-t">
@@ -309,8 +271,8 @@ const CharityProfile = () => {
                                   <p className="text-xs text-gray-500">{comment.date}</p>
                                 </div>
                                 <p className="mt-1 text-sm">{comment.content}</p>
-                                <Button 
-                                  variant="ghost" 
+                                <Button
+                                  variant="ghost"
                                   className="text-red-500 h-auto p-0 text-xs hover:bg-transparent mt-1"
                                 >
                                   Report
@@ -318,7 +280,7 @@ const CharityProfile = () => {
                               </div>
                             </div>
                           ))}
-                          
+
                           {isCommenting[post.id] && (
                             <div className="flex mt-4">
                               <div className="w-8 h-8 rounded-full bg-gray-300 mr-3 flex-shrink-0"></div>
@@ -330,13 +292,13 @@ const CharityProfile = () => {
                                   className="min-h-[80px]"
                                 />
                                 <div className="flex justify-end mt-2 space-x-2">
-                                  <Button 
+                                  <Button
                                     variant="outline"
-                                    onClick={() => setIsCommenting({...isCommenting, [post.id]: false})}
+                                    onClick={() => setIsCommenting({ ...isCommenting, [post.id]: false })}
                                   >
                                     Cancel
                                   </Button>
-                                  <Button 
+                                  <Button
                                     className="bg-hope-orange hover:bg-hope-dark-orange"
                                     onClick={() => handleNewComment(post.id)}
                                     disabled={!newComment.trim()}
@@ -347,9 +309,9 @@ const CharityProfile = () => {
                               </div>
                             </div>
                           )}
-                          
+
                           {!isCommenting[post.id] && (
-                            <Button 
+                            <Button
                               variant="ghost"
                               className="text-hope-orange mt-2"
                               onClick={() => toggleComment(post.id)}
@@ -365,7 +327,7 @@ const CharityProfile = () => {
               </div>
             </div>
           </TabsContent>
-          
+
           {/* Donate Tab Content */}
           <TabsContent value="donate">
             <div className="grid md:grid-cols-2 gap-8 mt-8">
@@ -376,16 +338,18 @@ const CharityProfile = () => {
                     <div className="bg-hope-orange/10 p-3 rounded-full mr-4">
                       <DollarSign className="h-6 w-6 text-hope-orange" />
                     </div>
-                    <h2 className="text-xl font-semibold">Donate Money</h2>
+                    <h2 className="text-xl font-semibold">
+
+                    </h2>
                   </div>
-                  
+
                   <p className="text-gray-600 mb-6">
                     Your financial contribution helps us continue our mission and make a difference in our community.
                   </p>
-                  
+
                   <div className="mb-6">
                     <label className="block mb-2 font-medium">Enter donation amount ($)</label>
-                    <input 
+                    <input
                       type="number"
                       min="1"
                       placeholder="0.00"
@@ -394,11 +358,11 @@ const CharityProfile = () => {
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-3 mb-6">
                     {[10, 25, 50, 100, 250, 500].map((amount) => (
-                      <Button 
-                        key={amount} 
+                      <Button
+                        key={amount}
                         variant="outline"
                         onClick={() => setDonationAmount(amount)}
                         className={donationAmount === amount ? 'border-hope-orange text-hope-orange' : ''}
@@ -407,8 +371,8 @@ const CharityProfile = () => {
                       </Button>
                     ))}
                   </div>
-                  
-                  <Button 
+
+                  <Button
                     className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white"
                     onClick={handleMoneyDonation}
                     disabled={!donationAmount}
@@ -417,7 +381,7 @@ const CharityProfile = () => {
                   </Button>
                 </div>
               </div>
-              
+
               {/* Items Donation */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="p-6">
@@ -427,82 +391,82 @@ const CharityProfile = () => {
                     </div>
                     <h2 className="text-xl font-semibold">Donate Items</h2>
                   </div>
-                  
+
                   <p className="text-gray-600 mb-6">
                     Donate clothes, food, electronics, or other items to help those in need.
                   </p>
-                  
+
                   <form onSubmit={handleDonationSubmit} className="space-y-4">
                     <div>
                       <label className="block mb-1 text-sm font-medium">Full Name</label>
-                      <input 
+                      <input
                         type="text"
                         required
                         value={donationForm.name}
-                        onChange={(e) => setDonationForm({...donationForm, name: e.target.value})}
+                        onChange={(e) => setDonationForm({ ...donationForm, name: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block mb-1 text-sm font-medium">Email Address</label>
-                      <input 
+                      <input
                         type="email"
                         required
                         value={donationForm.email}
-                        onChange={(e) => setDonationForm({...donationForm, email: e.target.value})}
+                        onChange={(e) => setDonationForm({ ...donationForm, email: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block mb-1 text-sm font-medium">Phone Number</label>
-                      <input 
+                      <input
                         type="tel"
                         required
                         value={donationForm.phone}
-                        onChange={(e) => setDonationForm({...donationForm, phone: e.target.value})}
+                        onChange={(e) => setDonationForm({ ...donationForm, phone: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block mb-1 text-sm font-medium">Address for Pickup</label>
-                      <textarea 
+                      <textarea
                         rows={2}
                         required
                         value={donationForm.address}
-                        onChange={(e) => setDonationForm({...donationForm, address: e.target.value})}
+                        onChange={(e) => setDonationForm({ ...donationForm, address: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                       ></textarea>
                     </div>
-                    
+
                     <div>
                       <label className="block mb-1 text-sm font-medium">Description of Items</label>
-                      <textarea 
+                      <textarea
                         rows={3}
                         required
                         placeholder="Please describe what you would like to donate"
                         value={donationForm.itemDescription}
-                        onChange={(e) => setDonationForm({...donationForm, itemDescription: e.target.value})}
+                        onChange={(e) => setDonationForm({ ...donationForm, itemDescription: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                       ></textarea>
                     </div>
-                    
+
                     <div>
                       <label className="block mb-1 text-sm font-medium">Upload Images (Optional)</label>
                       <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center">
                         <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
-                        <input 
-                          type="file" 
+                        <input
+                          type="file"
                           accept="image/*"
-                          onChange={(e) => setDonationForm({...donationForm, image: e.target.files?.[0] || null})}
+                          onChange={(e) => setDonationForm({ ...donationForm, image: e.target.files?.[0] || null })}
                           className="w-full mt-2"
                         />
                       </div>
                     </div>
-                    
-                    <Button 
+
+                    <Button
                       type="submit"
                       className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white"
                     >
@@ -513,7 +477,7 @@ const CharityProfile = () => {
               </div>
             </div>
           </TabsContent>
-          
+
           {/* Help Request Tab Content */}
           <TabsContent value="help">
             <div className="max-w-2xl mx-auto mt-8">
@@ -525,61 +489,35 @@ const CharityProfile = () => {
                     </div>
                     <h2 className="text-xl font-semibold">Request Assistance</h2>
                   </div>
-                  
+
                   <p className="text-gray-600 mb-8">
                     If you or someone you know needs assistance, please fill out this form. We'll review your request and get back to you as soon as possible.
                   </p>
-                  
+
                   <form onSubmit={handleHelpSubmit} className="space-y-4">
-                    <div>
-                      <label className="block mb-1 text-sm font-medium">Is this request for yourself or someone else?</label>
-                      <div className="flex gap-4 mt-2">
-                        <label className="flex items-center">
-                          <input 
-                            type="radio" 
-                            value="self" 
-                            checked={helpForm.forSelfOrOther === 'self'}
-                            onChange={() => setHelpForm({...helpForm, forSelfOrOther: 'self'})}
-                            className="mr-2"
-                          />
-                          For myself
-                        </label>
-                        <label className="flex items-center">
-                          <input 
-                            type="radio" 
-                            value="other" 
-                            checked={helpForm.forSelfOrOther === 'other'}
-                            onChange={() => setHelpForm({...helpForm, forSelfOrOther: 'other'})}
-                            className="mr-2"
-                          />
-                          For someone else
-                        </label>
-                      </div>
-                    </div>
-                    
                     <div>
                       <label className="block mb-1 text-sm font-medium">
                         {helpForm.forSelfOrOther === 'self' ? 'Your Full Name' : "Recipient's Full Name"}
                       </label>
-                      <input 
+                      <input
                         type="text"
                         required
                         value={helpForm.name}
-                        onChange={(e) => setHelpForm({...helpForm, name: e.target.value})}
+                        onChange={(e) => setHelpForm({ ...helpForm, name: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                       />
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block mb-1 text-sm font-medium">
                           {helpForm.forSelfOrOther === 'self' ? 'Your Email Address' : "Contact Email"}
                         </label>
-                        <input 
+                        <input
                           type="email"
                           required
                           value={helpForm.email}
-                          onChange={(e) => setHelpForm({...helpForm, email: e.target.value})}
+                          onChange={(e) => setHelpForm({ ...helpForm, email: e.target.value })}
                           className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
@@ -587,56 +525,56 @@ const CharityProfile = () => {
                         <label className="block mb-1 text-sm font-medium">
                           {helpForm.forSelfOrOther === 'self' ? 'Your Phone Number' : "Contact Phone"}
                         </label>
-                        <input 
+                        <input
                           type="tel"
                           required
                           value={helpForm.phone}
-                          onChange={(e) => setHelpForm({...helpForm, phone: e.target.value})}
+                          onChange={(e) => setHelpForm({ ...helpForm, phone: e.target.value })}
                           className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
                     </div>
-                    
+
                     <div>
                       <label className="block mb-1 text-sm font-medium">Address</label>
-                      <textarea 
+                      <textarea
                         rows={2}
                         required
                         value={helpForm.address}
-                        onChange={(e) => setHelpForm({...helpForm, address: e.target.value})}
+                        onChange={(e) => setHelpForm({ ...helpForm, address: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                       ></textarea>
                     </div>
-                    
+
                     <div>
                       <label className="block mb-1 text-sm font-medium">
                         Description of Assistance Needed
                       </label>
-                      <textarea 
+                      <textarea
                         rows={4}
                         required
                         placeholder="Please describe what kind of help you need and why"
                         value={helpForm.description}
-                        onChange={(e) => setHelpForm({...helpForm, description: e.target.value})}
+                        onChange={(e) => setHelpForm({ ...helpForm, description: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                       ></textarea>
                     </div>
-                    
+
                     <div>
                       <label className="block mb-1 text-sm font-medium">Upload Supporting Images (Optional)</label>
                       <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center">
                         <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
-                        <input 
-                          type="file" 
+                        <input
+                          type="file"
                           accept="image/*"
-                          onChange={(e) => setHelpForm({...helpForm, image: e.target.files?.[0] || null})}
+                          onChange={(e) => setHelpForm({ ...helpForm, image: e.target.files?.[0] || null })}
                           className="w-full mt-2"
                         />
                       </div>
                     </div>
-                    
+
                     <div className="pt-4">
-                      <Button 
+                      <Button
                         type="submit"
                         className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white py-3"
                       >
@@ -648,7 +586,7 @@ const CharityProfile = () => {
               </div>
             </div>
           </TabsContent>
-          
+
           {/* Contact Tab Content */}
           <TabsContent value="contact">
             <div className="grid md:grid-cols-3 gap-8 mt-8">
@@ -656,7 +594,7 @@ const CharityProfile = () => {
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="p-6">
                     <h2 className="text-xl font-semibold mb-6">Main Office</h2>
-                    
+
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
                         <MapPin className="h-5 w-5 text-hope-orange mt-0.5" />
@@ -665,7 +603,7 @@ const CharityProfile = () => {
                           <p className="text-gray-600">123 Charity St, San Francisco, CA 94103</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-start gap-3">
                         <Mail className="h-5 w-5 text-hope-orange mt-0.5" />
                         <div>
@@ -673,7 +611,7 @@ const CharityProfile = () => {
                           <p className="text-gray-600">{charity.contactInfo.email}</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-start gap-3">
                         <Phone className="h-5 w-5 text-hope-orange mt-0.5" />
                         <div>
@@ -681,47 +619,17 @@ const CharityProfile = () => {
                           <p className="text-gray-600">{charity.contactInfo.phone}</p>
                         </div>
                       </div>
-                      
-                      <div className="flex items-start gap-3">
-                        <Clock className="h-5 w-5 text-hope-orange mt-0.5" />
-                        <div>
-                          <p className="font-medium">Working Hours</p>
-                          <p className="text-gray-600">{charity.contactInfo.workHours}</p>
-                        </div>
-                      </div>
                     </div>
-                    
-                    <div className="mt-6">
-                      <h3 className="font-medium mb-3">Connect with us</h3>
-                      <div className="flex gap-3">
-                        <a href="#" className="bg-hope-orange/10 p-2 rounded-full text-hope-orange hover:bg-hope-orange/20">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                          </svg>
-                        </a>
-                        <a href="#" className="bg-hope-orange/10 p-2 rounded-full text-hope-orange hover:bg-hope-orange/20">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-                          </svg>
-                        </a>
-                        <a href="#" className="bg-hope-orange/10 p-2 rounded-full text-hope-orange hover:bg-hope-orange/20">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                          </svg>
-                        </a>
-                      </div>
-                    </div>
+
                   </div>
                 </div>
               </div>
-              
+
               <div className="md:col-span-2">
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="p-6">
                     <h2 className="text-xl font-semibold mb-6">Other Branches</h2>
-                    
+
                     <div className="grid md:grid-cols-2 gap-6">
                       {charity.branches.map((branch) => (
                         <div key={branch.id} className="border rounded-lg p-4">
@@ -735,63 +643,9 @@ const CharityProfile = () => {
                               <Phone className="h-4 w-4 text-hope-orange mt-0.5" />
                               <span>{branch.phone}</span>
                             </div>
-                            <div className="flex items-start gap-2">
-                              <Clock className="h-4 w-4 text-hope-orange mt-0.5" />
-                              <span>{branch.workHours}</span>
-                            </div>
                           </div>
                         </div>
                       ))}
-                    </div>
-                    
-                    <div className="mt-8">
-                      <h2 className="text-xl font-semibold mb-6">Send Us a Message</h2>
-                      
-                      <form className="space-y-4">
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <label htmlFor="name" className="block mb-1 text-sm font-medium">Your Name</label>
-                            <input 
-                              id="name" 
-                              type="text" 
-                              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                            />
-                          </div>
-                          <div>
-                            <label htmlFor="email" className="block mb-1 text-sm font-medium">Your Email</label>
-                            <input 
-                              id="email" 
-                              type="email" 
-                              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="subject" className="block mb-1 text-sm font-medium">Subject</label>
-                          <input 
-                            id="subject" 
-                            type="text" 
-                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="message" className="block mb-1 text-sm font-medium">Message</label>
-                          <textarea 
-                            id="message" 
-                            rows={4}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          ></textarea>
-                        </div>
-                        
-                        <Button 
-                          type="submit"
-                          className="bg-hope-orange hover:bg-hope-dark-orange"
-                        >
-                          Send Message
-                        </Button>
-                      </form>
                     </div>
                   </div>
                 </div>
@@ -800,7 +654,7 @@ const CharityProfile = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
+    </MainLayout >
   );
 };
 

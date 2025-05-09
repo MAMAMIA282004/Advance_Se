@@ -10,7 +10,7 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, hideFooter = false }) => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen min-w-[30rem] flex flex-col">
       <Header />
       <main className="flex-grow">
         {children}

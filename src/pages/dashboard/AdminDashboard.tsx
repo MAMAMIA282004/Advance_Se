@@ -12,12 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  Eye, Check, X, Trash, FileText, AlertTriangle, 
-  User, Building, Flag, Search 
+import {
+  Eye, Check, X, Trash, FileText, AlertTriangle,
+  User, Building, Flag, Search
 } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,35 +28,35 @@ import {
 
 const AdminDashboard = () => {
   const [charities, setCharities] = useState([
-    { 
-      id: 1, 
-      name: 'Red Cross Local Chapter', 
+    {
+      id: 1,
+      name: 'Red Cross Local Chapter',
       email: 'info@redcross-local.org',
-      status: 'approved', 
+      status: 'approved',
       registrationDate: '2023-01-15',
       documentVerified: true
     },
-    { 
-      id: 2, 
-      name: 'Food Bank Inc.', 
+    {
+      id: 2,
+      name: 'Food Bank Inc.',
       email: 'contact@foodbank.org',
-      status: 'approved', 
+      status: 'approved',
       registrationDate: '2023-02-10',
       documentVerified: true
     },
-    { 
-      id: 3, 
-      name: 'Shelter Hope', 
+    {
+      id: 3,
+      name: 'Shelter Hope',
       email: 'info@shelterhope.org',
-      status: 'pending', 
+      status: 'pending',
       registrationDate: '2023-05-05',
       documentVerified: false
     },
-    { 
-      id: 4, 
-      name: 'Education First', 
+    {
+      id: 4,
+      name: 'Education First',
       email: 'support@educationfirst.org',
-      status: 'pending', 
+      status: 'pending',
       registrationDate: '2023-05-08',
       documentVerified: false
     },
@@ -71,30 +71,30 @@ const AdminDashboard = () => {
   ]);
 
   const [reports, setReports] = useState([
-    { 
-      id: 1, 
-      type: 'comment', 
-      reporter: 'Jane Smith', 
-      reported: 'Bob Johnson', 
-      content: 'Inappropriate language in comment', 
+    {
+      id: 1,
+      type: 'comment',
+      reporter: 'Jane Smith',
+      reported: 'Bob Johnson',
+      content: 'Inappropriate language in comment',
       date: '2023-05-10',
       status: 'pending'
     },
-    { 
-      id: 2, 
-      type: 'post', 
-      reporter: 'Michael Brown', 
-      reported: 'Red Cross Local Chapter', 
-      content: 'Misleading information in charity post', 
+    {
+      id: 2,
+      type: 'post',
+      reporter: 'Michael Brown',
+      reported: 'Red Cross Local Chapter',
+      content: 'Misleading information in charity post',
       date: '2023-05-09',
       status: 'pending'
     },
-    { 
-      id: 3, 
-      type: 'comment', 
-      reporter: 'Sarah Williams', 
-      reported: 'John Doe', 
-      content: 'Harassment in comment section', 
+    {
+      id: 3,
+      type: 'comment',
+      reporter: 'Sarah Williams',
+      reported: 'John Doe',
+      content: 'Harassment in comment section',
       date: '2023-05-08',
       status: 'pending'
     },
@@ -105,6 +105,13 @@ const AdminDashboard = () => {
   const [selectedReport, setSelectedReport] = useState<any>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [reportActionDialogOpen, setReportActionDialogOpen] = useState(false);
+
+  function handleOpenDialog() {
+    setViewDialogOpen(!viewDialogOpen);
+    if (selectedCharity) setSelectedCharity(null)
+    if (selectedReport) setSelectedReport(null)
+    if (selectedUser) setSelectedUser(null)
+  }
 
   const handleCharityAction = (id: number, action: 'approve' | 'decline' | 'delete') => {
     if (action === 'delete') {
@@ -174,9 +181,9 @@ const AdminDashboard = () => {
       <div className="bg-hope-gray py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold text-hope-dark-gray mb-6">Admin Dashboard</h1>
-          
+
           <Tabs defaultValue="charities">
-            <TabsList className="mb-8 bg-white">
+            <TabsList className="mb-8 bg-white flex justify-around">
               <TabsTrigger value="charities" className="flex items-center gap-2">
                 <Building className="h-4 w-4" /> Manage Charities
               </TabsTrigger>
@@ -187,7 +194,7 @@ const AdminDashboard = () => {
                 <Flag className="h-4 w-4" /> Manage Reports
               </TabsTrigger>
             </TabsList>
-            
+
             {/* Charities Tab */}
             <TabsContent value="charities">
               <Card>
@@ -199,7 +206,7 @@ const AdminDashboard = () => {
                   <div className="flex items-center justify-between mb-6">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <input 
+                      <input
                         type="text"
                         placeholder="Search charities..."
                         className="pl-9 pr-4 py-2 border rounded-md w-full md:w-80"
@@ -209,7 +216,7 @@ const AdminDashboard = () => {
                       <Button variant="outline" size="sm">Export List</Button>
                     </div>
                   </div>
-                  
+
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -228,11 +235,11 @@ const AdminDashboard = () => {
                           <TableCell>{charity.name}</TableCell>
                           <TableCell>{charity.email}</TableCell>
                           <TableCell>
-                            <Badge 
+                            <Badge
                               variant={charity.status === 'approved' ? 'outline' : 'secondary'}
-                              className={charity.status === 'approved' 
-                                ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                                : charity.status === 'pending' 
+                              className={charity.status === 'approved'
+                                ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                                : charity.status === 'pending'
                                   ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
                                   : 'bg-red-100 text-red-800 hover:bg-red-100'
                               }
@@ -243,26 +250,26 @@ const AdminDashboard = () => {
                           <TableCell>{charity.registrationDate}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleViewCharity(charity.id)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              
+
                               {charity.status === 'pending' && (
                                 <>
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
                                     onClick={() => handleCharityAction(charity.id, 'approve')}
                                     className="text-green-600 hover:text-green-700"
                                   >
                                     <Check className="h-4 w-4" />
                                   </Button>
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
                                     onClick={() => handleCharityAction(charity.id, 'decline')}
                                     className="text-red-600 hover:text-red-700"
@@ -271,9 +278,9 @@ const AdminDashboard = () => {
                                   </Button>
                                 </>
                               )}
-                              
-                              <Button 
-                                variant="outline" 
+
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleCharityAction(charity.id, 'delete')}
                                 className="text-red-600 hover:text-red-700"
@@ -289,7 +296,7 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             {/* Users Tab */}
             <TabsContent value="users">
               <Card>
@@ -301,7 +308,7 @@ const AdminDashboard = () => {
                   <div className="flex items-center justify-between mb-6">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <input 
+                      <input
                         type="text"
                         placeholder="Search users..."
                         className="pl-9 pr-4 py-2 border rounded-md w-full md:w-80"
@@ -311,7 +318,7 @@ const AdminDashboard = () => {
                       <Button variant="outline" size="sm">Export List</Button>
                     </div>
                   </div>
-                  
+
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -333,15 +340,15 @@ const AdminDashboard = () => {
                           <TableCell>{user.lastActive}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleViewUser(user.id)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleDeleteUser(user.id)}
                                 className="text-red-600 hover:text-red-700"
@@ -357,7 +364,7 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             {/* Reports Tab */}
             <TabsContent value="reports">
               <Card>
@@ -391,9 +398,9 @@ const AdminDashboard = () => {
                           <TableCell>{report.reported}</TableCell>
                           <TableCell>{report.date}</TableCell>
                           <TableCell>
-                            <Badge 
+                            <Badge
                               variant="outline"
-                              className={report.status === 'pending' 
+                              className={report.status === 'pending'
                                 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
                                 : 'bg-green-100 text-green-800 hover:bg-green-100'
                               }
@@ -403,16 +410,16 @@ const AdminDashboard = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleViewReport(report.id)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
                               {report.status === 'pending' && (
-                                <Button 
-                                  variant="outline" 
+                                <Button
+                                  variant="outline"
                                   size="sm"
                                   onClick={() => {
                                     setSelectedReport(report);
@@ -435,21 +442,21 @@ const AdminDashboard = () => {
           </Tabs>
         </div>
       </div>
-      
+
       {/* View Dialog for Charity/User/Report details */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+      <Dialog open={viewDialogOpen} onOpenChange={handleOpenDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
               {selectedCharity ? 'Charity Details' : selectedUser ? 'User Details' : 'Report Details'}
             </DialogTitle>
             <DialogDescription>
-              {selectedCharity ? 'View charity information and verification documents' : 
-               selectedUser ? 'View user information and activity' : 
-               'Review reported content details'}
+              {selectedCharity ? 'View charity information and verification documents' :
+                selectedUser ? 'View user information and activity' :
+                  'Review reported content details'}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="py-4">
             {selectedCharity && (
               <div className="space-y-4">
@@ -463,7 +470,7 @@ const AdminDashboard = () => {
                     <p><strong>Document Verified:</strong> {selectedCharity.documentVerified ? 'Yes' : 'No'}</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="font-semibold">Verification Document</h3>
                   <div className="mt-2 p-4 border border-dashed rounded-md flex items-center justify-center">
@@ -475,7 +482,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
-            
+
             {selectedUser && (
               <div className="space-y-4">
                 <div>
@@ -487,7 +494,7 @@ const AdminDashboard = () => {
                     <p><strong>Last Active:</strong> {selectedUser.lastActive}</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="font-semibold">Activity Summary</h3>
                   <div className="mt-2 space-y-2">
@@ -498,7 +505,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
-            
+
             {selectedReport && (
               <div className="space-y-4">
                 <div>
@@ -511,7 +518,7 @@ const AdminDashboard = () => {
                     <p><strong>Status:</strong> {selectedReport.status}</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="font-semibold">Reported Content</h3>
                   <div className="mt-2 p-4 border rounded-md bg-gray-50">
@@ -521,7 +528,7 @@ const AdminDashboard = () => {
               </div>
             )}
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
               Close
@@ -529,7 +536,7 @@ const AdminDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Report Action Dialog */}
       <Dialog open={reportActionDialogOpen} onOpenChange={setReportActionDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -539,15 +546,15 @@ const AdminDashboard = () => {
               Choose what action to take on this reported content
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="py-4">
             <p className="mb-4">
               This will handle the reported {selectedReport?.type}. Please select an appropriate action:
             </p>
-            
+
             <div className="space-y-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full justify-start text-left"
                 onClick={() => selectedReport && handleReportAction(selectedReport.id, 'removeContent')}
               >
@@ -556,9 +563,9 @@ const AdminDashboard = () => {
                   <p className="text-sm text-gray-500">Delete just the reported {selectedReport?.type}</p>
                 </div>
               </Button>
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 className="w-full justify-start text-left"
                 onClick={() => selectedReport && handleReportAction(selectedReport.id, 'removeAll')}
               >
@@ -569,7 +576,7 @@ const AdminDashboard = () => {
               </Button>
             </div>
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setReportActionDialogOpen(false)}>
               Cancel

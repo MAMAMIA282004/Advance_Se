@@ -63,14 +63,14 @@ const UserDashboard = () => {
       <div className="bg-hope-gray py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold text-hope-dark-gray mb-6">User Dashboard</h1>
-          
+
           <Tabs defaultValue="profile">
-            <TabsList className="mb-8 bg-white">
+            <TabsList className="mb-8 bg-white flex justify-around">
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="donations">Donation Requests</TabsTrigger>
               <TabsTrigger value="help">Help Requests</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="profile">
               <div className="grid md:grid-cols-3 gap-8">
                 <Card className="md:col-span-1">
@@ -79,8 +79,8 @@ const UserDashboard = () => {
                   </CardHeader>
                   <CardContent className="flex flex-col items-center">
                     <div className="w-48 h-48 rounded-full overflow-hidden mb-6">
-                      <img 
-                        src={profileData.profileImage} 
+                      <img
+                        src={profileData.profileImage}
                         alt="Profile"
                         className="w-full h-full object-cover"
                       />
@@ -90,7 +90,7 @@ const UserDashboard = () => {
                     </Button>
                   </CardContent>
                 </Card>
-                
+
                 <Card className="md:col-span-2">
                   <CardHeader>
                     <CardTitle>Personal Information</CardTitle>
@@ -100,48 +100,48 @@ const UserDashboard = () => {
                     <form onSubmit={handleProfileUpdate} className="space-y-5">
                       <div>
                         <label htmlFor="fullName" className="block mb-1 text-sm font-medium">Full Name</label>
-                        <input 
-                          id="fullName" 
-                          type="text" 
+                        <input
+                          id="fullName"
+                          type="text"
                           value={profileData.fullName}
-                          onChange={e => setProfileData({...profileData, fullName: e.target.value})}
+                          onChange={e => setProfileData({ ...profileData, fullName: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</label>
-                        <input 
-                          id="email" 
-                          type="email" 
+                        <input
+                          id="email"
+                          type="email"
                           value={profileData.email}
-                          onChange={e => setProfileData({...profileData, email: e.target.value})}
+                          onChange={e => setProfileData({ ...profileData, email: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="phone" className="block mb-1 text-sm font-medium">Phone Number</label>
-                        <input 
-                          id="phone" 
-                          type="tel" 
+                        <input
+                          id="phone"
+                          type="tel"
                           value={profileData.phone}
-                          onChange={e => setProfileData({...profileData, phone: e.target.value})}
+                          onChange={e => setProfileData({ ...profileData, phone: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="address" className="block mb-1 text-sm font-medium">Address</label>
-                        <textarea 
-                          id="address" 
+                        <textarea
+                          id="address"
                           rows={3}
                           value={profileData.address}
-                          onChange={e => setProfileData({...profileData, address: e.target.value})}
+                          onChange={e => setProfileData({ ...profileData, address: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         ></textarea>
                       </div>
-                      
+
                       <div>
                         <Button type="submit" className="bg-hope-orange hover:bg-hope-dark-orange">
                           Save Changes
@@ -152,7 +152,7 @@ const UserDashboard = () => {
                 </Card>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="donations">
               <Card>
                 <CardHeader>
@@ -192,8 +192,8 @@ const UserDashboard = () => {
                                 <Download className="h-4 w-4" />
                               </Button>
                               {request.status === 'Pending' && (
-                                <Button 
-                                  variant="outline" 
+                                <Button
+                                  variant="outline"
                                   size="sm"
                                   onClick={() => handleCancelRequest(request.id)}
                                   className="text-red-500 hover:text-red-700"
@@ -210,7 +210,7 @@ const UserDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="help">
               <Card>
                 <CardHeader>
@@ -250,8 +250,8 @@ const UserDashboard = () => {
                                 <FileText className="h-4 w-4" />
                               </Button>
                               {request.status === 'Pending' && (
-                                <Button 
-                                  variant="outline" 
+                                <Button
+                                  variant="outline"
                                   size="sm"
                                   onClick={() => handleCancelRequest(request.id)}
                                   className="text-red-500 hover:text-red-700"

@@ -75,11 +75,11 @@ const CharitiesList = () => {
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
 
   const filteredCharities = charities.filter(charity => {
-    const matchesSearch = charity.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         charity.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = charity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      charity.description.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesCategory = selectedCategory === 'All Categories' || charity.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -95,7 +95,7 @@ const CharitiesList = () => {
               Browse through verified charities and make a difference by donating or volunteering.
             </p>
           </div>
-          
+
           {/* Search and Filter Section */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-10">
             <div className="md:flex md:space-x-4">
@@ -109,45 +109,26 @@ const CharitiesList = () => {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                 />
               </div>
-              <div className="relative min-w-[220px]">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full appearance-none pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-hope-orange/50 bg-white"
-                >
-                  {categories.map((category, idx) => (
-                    <option key={idx} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                  </svg>
-                </div>
-              </div>
             </div>
           </div>
-          
+
           {/* Results Count */}
           <div className="mb-6 text-gray-600">
             Showing {filteredCharities.length} {filteredCharities.length === 1 ? 'charity' : 'charities'}
           </div>
-          
+
           {/* Charities List */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCharities.map((charity) => (
-              <Link 
-                to={`/charities/${charity.id}`} 
+              <Link
+                to={`/charities/${charity.id}`}
                 key={charity.id}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="p-6">
                   <div className="flex items-center mb-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
-                      <img 
+                      <img
                         src={charity.logo}
                         alt={charity.name}
                         className="w-full h-full object-cover"
@@ -155,22 +136,19 @@ const CharitiesList = () => {
                     </div>
                     <h2 className="text-xl font-semibold text-hope-dark-gray">{charity.name}</h2>
                   </div>
-                  
+
                   <p className="text-gray-600 mb-4 line-clamp-2">{charity.description}</p>
-                  
+
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-medium px-2 py-1 bg-hope-orange/10 text-hope-orange rounded-full">
-                      {charity.category}
-                    </span>
                     <div className="flex items-center text-gray-500 text-sm">
                       <MapPin className="h-3 w-3 mr-1" />
                       {charity.location}
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="border-t border-gray-100">
-                  <Button 
+                  <Button
                     className="w-full bg-transparent hover:bg-hope-gray text-hope-orange py-3 rounded-none"
                     variant="ghost"
                   >
@@ -180,12 +158,12 @@ const CharitiesList = () => {
               </Link>
             ))}
           </div>
-          
+
           {filteredCharities.length === 0 && (
             <div className="text-center py-16 bg-white rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-2">No charities found</h3>
               <p className="text-gray-600 mb-6">Try adjusting your search criteria</p>
-              <Button onClick={() => {setSearchTerm(''); setSelectedCategory('All Categories');}} className="bg-hope-orange hover:bg-hope-dark-orange">
+              <Button onClick={() => { setSearchTerm(''); setSelectedCategory('All Categories'); }} className="bg-hope-orange hover:bg-hope-dark-orange">
                 Clear Filters
               </Button>
             </div>

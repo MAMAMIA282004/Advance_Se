@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Icon from '../ui/icon';
 
 const Footer = () => {
   return (
@@ -11,7 +12,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Heart className="h-6 w-6 fill-white stroke-white" />
+              <Icon size={8} mode='light'></Icon>
               <span className="font-bold text-xl">HopeGivers</span>
             </div>
             <p className="text-white/80 max-w-xs">
@@ -20,13 +21,13 @@ const Footer = () => {
             <div className="pt-2">
               <h3 className="font-medium mb-2">For news</h3>
               <div className="flex">
-                <input 
-                  type="email" 
-                  placeholder="Email" 
+                <input
+                  type="email"
+                  placeholder="Email"
                   className="py-2 px-3 text-hope-dark-gray rounded-l-md focus:outline-none w-full max-w-[200px]"
                 />
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="bg-hope-dark-orange hover:bg-hope-dark-orange/90 rounded-l-none"
                 >
                   <Mail className="h-4 w-4" />
