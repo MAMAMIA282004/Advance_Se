@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, X, Search } from 'lucide-react';
+import { Heart, Menu, X, Search, Settings } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -11,9 +11,12 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Icon from '../ui/icon';
 import { Switch } from '../ui/switch';
+import { IUserData } from '@/interfaces/interfaces';
+import { GetUserData, Logout } from '@/lib/utils';
 
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const userData: IUserData = GetUserData();
+  const [isLoggedIn, setIsLoggedIn] = useState(userData !== null);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   function ChangeMenuState() {
@@ -22,10 +25,6 @@ const Header = () => {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="w-full flex justify-center py-5 gap-2">
-        <label htmlFor="loginSwitch">Login</label>
-        <Switch id='loginSwitch' onClick={() => setIsLoggedIn(!isLoggedIn)} />
-      </div>
       <div className="container mx-auto flex justify-between items-center py-3 px-4">
         <Link to="/" className="flex items-center gap-2 text-hope-orange">
           <Icon size={8}></Icon>
@@ -73,17 +72,23 @@ const Header = () => {
             </>
           ) : (
             <DropdownMenu open={menuOpen} onOpenChange={ChangeMenuState} >
-              <DropdownMenuTrigger className="bg-hope-orange hover:bg-hope-dark-orange text-white px-3 py-1 rounded-lg focus:outline-none">Dashboard</DropdownMenuTrigger>
+              <DropdownMenuTrigger className="bg-hope-orange hover:bg-hope-dark-orange text-white p-2 rounded-full focus:outline-none"><Settings /></DropdownMenuTrigger>
               <DropdownMenuContent className='flex flex-col'>
-                <Link to="/dashboard/user" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
-                  User
-                </Link>
-                <Link to="/dashboard/charity" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
-                  Charity
-                </Link>
-                <Link to="/dashboard/admin" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
-                  Admin
-                </Link>
+                <>
+                  {userData?.roles.length > 1 ?
+                    <Link to="/dashboard/admin" className="text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
+                      Admin
+                    </Link>
+                    : userData?.roles[0] === 'charity' ?
+                      <Link to="/dashboard/charity" className="text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
+                        Charity
+                      </Link> :
+                      < Link to="/dashboard/user" className="text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
+                        User
+                      </Link >
+                  }
+                  <Button type='submit' name='logout' variant='ghost' className="text-hope-dark-gray hover:bg-white px-2 py-6 justify-start text-base hover:text-hope-orange transition-colors" onClick={() => Logout()}>Logout</Button>
+                </>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -146,9 +151,9 @@ const Header = () => {
               </div>
             </SheetContent>
           </Sheet>
-        </div>
-      </div>
-    </header>
+        </div >
+      </div >
+    </header >
   );
 };
 

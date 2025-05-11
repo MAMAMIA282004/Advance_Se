@@ -14,9 +14,7 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import CharitiesList from "./pages/charities/CharitiesList";
 import CharityProfile from "./pages/charities/CharityProfile";
 import About from "./pages/About";
-import Contact from "./pages/Contact";
 
-// Create a client for TanStack Query
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -31,7 +29,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/about" element={<About />} />
           <Route path="/charities" element={<CharitiesList />} />
-          <Route path="/charities/:id" element={<CharityProfile />} />
+          <Route path="/charity/:username" element={<CharityProfile />} />
           <Route path="/dashboard/user" element={<UserDashboard />} />
           <Route path="/dashboard/charity" element={<CharityDashboard />} />
           <Route path="/dashboard/admin" element={<AdminDashboard />} />

@@ -4,83 +4,33 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/components/layout/MainLayout';
 import { Search, Filter, MapPin } from 'lucide-react';
+import { GetAllCharities } from '@/Api/charities/charities';
+import { IHomeCharities } from '@/interfaces/interfaces';
+import { useEffect } from 'react';
 
 const CharitiesList = () => {
-  const charities = [
-    {
-      id: 1,
-      name: 'Red Cross Local Chapter',
-      logo: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?auto=format&fit=crop&q=80&w=150&h=150',
-      description: 'We provide emergency assistance, disaster relief, and education in our local community.',
-      category: 'Disaster Relief',
-      location: 'San Francisco, CA'
-    },
-    {
-      id: 2,
-      name: 'Food Bank Inc.',
-      logo: 'https://images.unsplash.com/photo-1598971861713-54ad16a7e72e?auto=format&fit=crop&q=80&w=150&h=150',
-      description: 'Working to end hunger in our community by providing meals to those in need.',
-      category: 'Food & Hunger',
-      location: 'Los Angeles, CA'
-    },
-    {
-      id: 3,
-      name: 'Shelter Hope',
-      logo: 'https://images.unsplash.com/photo-1604328727766-a151d1045ab4?auto=format&fit=crop&q=80&w=150&h=150',
-      description: 'Providing temporary housing and support services to homeless individuals and families.',
-      category: 'Homelessness',
-      location: 'Chicago, IL'
-    },
-    {
-      id: 4,
-      name: 'Children\'s Fund',
-      logo: 'https://images.unsplash.com/photo-1599084993091-1cb5c0e6920b?auto=format&fit=crop&q=80&w=150&h=150',
-      description: 'Supporting educational programs and healthcare for underprivileged children.',
-      category: 'Education',
-      location: 'New York, NY'
-    },
-    {
-      id: 5,
-      name: 'Wildlife Conservation Group',
-      logo: 'https://images.unsplash.com/photo-1592486058517-36236ba247c8?auto=format&fit=crop&q=80&w=150&h=150',
-      description: 'Protecting endangered species and their habitats through conservation efforts.',
-      category: 'Environment',
-      location: 'Seattle, WA'
-    },
-    {
-      id: 6,
-      name: 'Veterans Support Alliance',
-      logo: 'https://images.unsplash.com/photo-1528938102132-4a9276b8e320?auto=format&fit=crop&q=80&w=150&h=150',
-      description: 'Providing support services and resources to veterans and their families.',
-      category: 'Veterans',
-      location: 'Austin, TX'
-    },
-  ];
 
-  const categories = [
-    'All Categories',
-    'Disaster Relief',
-    'Food & Hunger',
-    'Homelessness',
-    'Education',
-    'Health',
-    'Environment',
-    'Veterans',
-    'Animals',
-    'Arts & Culture',
-    'Community Development'
-  ];
+  const [charities, setCharities] = useState<IHomeCharities[]>([]);
+
+  useEffect(() => {
+    const fetchCharities = async () => {
+      try {
+        const data = await GetAllCharities();
+        setCharities(data);
+      } catch (error) {
+        console.error('Error fetching charities:', error);
+      }
+    };
+
+    fetchCharities();
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
 
   const filteredCharities = charities.filter(charity => {
-    const matchesSearch = charity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      charity.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesCategory = selectedCategory === 'All Categories' || charity.category === selectedCategory;
-
-    return matchesSearch && matchesCategory;
+    const matchesSearch = charity.charityName.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesSearch;
   });
 
   return (
@@ -121,28 +71,26 @@ const CharitiesList = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCharities.map((charity) => (
               <Link
-                to={`/charities/${charity.id}`}
-                key={charity.id}
+                to={`/charity/${charity.userName}`}
+                key={charity.userName}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="p-6">
                   <div className="flex items-center mb-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
                       <img
-                        src={charity.logo}
-                        alt={charity.name}
+                        src={charity.photoUrl ? `https://ma3ansawa.runasp.net/${charity.photoUrl}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
+                        alt={charity.charityName}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <h2 className="text-xl font-semibold text-hope-dark-gray">{charity.name}</h2>
+                    <h2 className="text-xl font-semibold text-hope-dark-gray">{charity.charityName}</h2>
                   </div>
-
-                  <p className="text-gray-600 mb-4 line-clamp-2">{charity.description}</p>
 
                   <div className="flex justify-between items-center">
                     <div className="flex items-center text-gray-500 text-sm">
                       <MapPin className="h-3 w-3 mr-1" />
-                      {charity.location}
+                      {charity.address}
                     </div>
                   </div>
                 </div>

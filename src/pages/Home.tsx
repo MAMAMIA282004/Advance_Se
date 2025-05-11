@@ -5,36 +5,22 @@ import { Button } from '@/components/ui/button';
 import MainLayout from '@/components/layout/MainLayout';
 import { Heart, ArrowRight, Gift, HandHelping, Star, Users } from 'lucide-react';
 import CharityCard from '@/components/charity/CharityCard';
-
-// Mock data for featured charities
-const featuredCharities = [
-  {
-    id: 1,
-    name: "Children's Hope Foundation",
-    category: "Children & Youth",
-    logo: "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&q=80&w=200&h=200",
-    description: "Supporting vulnerable children with education, healthcare and nutrition programs.",
-    verified: true
-  },
-  {
-    id: 2,
-    name: "Ocean Conservation Alliance",
-    logo: "https://images.unsplash.com/photo-1518877593221-1f28583780b4?auto=format&fit=crop&q=80&w=200&h=200",
-    category: "Environment",
-    description: "Working to protect marine ecosystems and endangered marine species.",
-    verified: true
-  },
-  {
-    id: 3,
-    name: "Global Hunger Relief",
-    logo: "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac?auto=format&fit=crop&q=80&w=200&h=200",
-    category: "Hunger Relief",
-    description: "Fighting food insecurity with sustainable agriculture solutions.",
-    verified: false
-  }
-];
+import { GetAllCharities } from '@/Api/charities/charities';
+import { IHomeCharities } from '@/interfaces/interfaces';
+import { useEffect, useState } from 'react';
 
 const Home = () => {
+  const [featuredCharities, setFeaturedCharities] = useState<IHomeCharities[]>([]);
+
+  useEffect(() => {
+    const fetchCharities = async () => {
+      const data = await GetAllCharities();
+      setFeaturedCharities(data.length >= 3 ? [data[0], data[1], data[2]] : data);
+    };
+
+    fetchCharities();
+  }, []);
+
   return (
     <MainLayout>
       {/* Hero Section */}
@@ -55,38 +41,53 @@ const Home = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-white py-12 md:py-20">
+      <section className="bg-white py-10 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div className="bg-hope-gray rounded-lg p-8">
-              <div className="flex justify-center mb-4">
-                <Gift className="h-12 w-12 text-hope-orange" />
+          <h1 className='text-hope-orange text-center pb-10 font-bold text-5xl'> Get Involved Today</h1>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
+            <div className="rounded-lg flex flex-col h-full">
+              <div className="aspect-w-4 aspect-[4/3]">
+                <img src="/lovable-uploads/donate.jpg" className='w-full h-full object-cover' alt="donate" />
               </div>
-              <h3 className="text-4xl font-bold mb-2">1,240+</h3>
-              <p className="text-gray-600">Successful Donations</p>
+              <h2 className='px-2 py-5 text-lg font-medium flex items-center justify-center flex-grow'>Support others by donating money or items they truly need </h2>
             </div>
-
-            <div className="bg-hope-gray rounded-lg p-8">
-              <div className="flex justify-center mb-4">
-                <Users className="h-12 w-12 text-hope-orange" />
+            <div className="rounded-lg flex flex-col h-full">
+              <div className="aspect-w-4 aspect-[4/3]">
+                <img src="/lovable-uploads/requestHelp.jpeg" className='w-full h-full object-cover' alt="donate" />
               </div>
-              <h3 className="text-4xl font-bold mb-2">380+</h3>
-              <p className="text-gray-600">Registered Charities</p>
+              <h2 className='px-2 py-5 text-lg font-medium flex items-center justify-center flex-grow'> If you're in need, we're here to connect you with real help</h2>
             </div>
-
-            <div className="bg-hope-gray rounded-lg p-8">
-              <div className="flex justify-center mb-4">
-                <HandHelping className="h-12 w-12 text-hope-orange" />
+            <div className="rounded-lg flex flex-col h-full">
+              <div className="aspect-w-4 aspect-[4/3]">
+                <img src="/lovable-uploads/volunteer.jpg" className='w-full h-full object-cover' alt="donate" />
               </div>
-              <h3 className="text-4xl font-bold mb-2">2,500+</h3>
-              <p className="text-gray-600">People Helped</p>
+              <h2 className='px-2 py-5 text-lg font-medium flex items-center justify-center flex-grow'> Join our platform as a verified charity and reach more people in need</h2>
             </div>
           </div>
         </div>
       </section>
 
       {/* Featured Charities */}
-      <section className="py-16">
+      <section className="py-10">
+        <div className="container text-center lg:text-start mx-auto flex flex-col lg:flex-row items-start justify-between items-center gap-8">
+          <div className="lg:w-1/2 space-y-3">
+            <h2 className="text-4xl font-extrabold text-hope-orange">Who We Are</h2>
+            <h3 className="text-xl font-semibold">Introduction</h3>
+            <p className="text-gray-800 leading-7">
+              HopeGivers was founded with a simple but powerful mission: to connect those in need with those who want to help. We believe that everyone has something to give, whether it's money, time, skills, or material goods. Our platform makes it easy and transparent to support verified charities that are making a real difference in communities.
+            </p>
+            <p className="text-gray-800 leading-7">
+              We carefully vet each charity that joins our platform to ensure they are legitimate and effectively using donations. Users can browse charities, learn about their work, and choose to donate money or goods. For those in need, we provide a simple way to request help from appropriate organizations.            </p>
+          </div>
+
+          <div className="lg:w-1/2">
+            <img src="/lovable-uploads/whoAreWe.jpg" alt="Who We Are Image" className="w-full max-h-fit object-cover rounded-md shadow-md" />
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Charities */}
+      <section className="py-10">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-hope-dark-gray">Featured Charities</h2>
@@ -100,53 +101,8 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredCharities.map((charity) => (
-              <CharityCard key={charity.id} charity={charity} />
+              <CharityCard key={charity.userName} charity={charity} />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="bg-hope-gray py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-hope-dark-gray mb-12">How It Works</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-              <div className="relative mb-6 mx-auto">
-                <div className="w-16 h-16 bg-hope-orange rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-white font-bold text-xl">1</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Create an Account</h3>
-              <p className="text-gray-600">
-                Sign up as a donor or a charity organization with a simple registration process.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-              <div className="relative mb-6 mx-auto">
-                <div className="w-16 h-16 bg-hope-orange rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-white font-bold text-xl">2</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Browse or Request</h3>
-              <p className="text-gray-600">
-                Explore verified charities to donate to or submit a request for assistance.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-              <div className="relative mb-6 mx-auto">
-                <div className="w-16 h-16 bg-hope-orange rounded-full flex items-center justify-center mx-auto">
-                  <span className="text-white font-bold text-xl">3</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Make a Difference</h3>
-              <p className="text-gray-600">
-                Complete your donation securely or receive the help you need.
-              </p>
-            </div>
           </div>
         </div>
       </section>
