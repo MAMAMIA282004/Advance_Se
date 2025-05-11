@@ -79,7 +79,7 @@ const CharitiesList = () => {
                   <div className="flex items-center mb-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
                       <img
-                        src={charity.photoUrl ? `https://ma3ansawa.runasp.net/${charity.photoUrl}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
+                        src={charity.photoUrl ? `https://ma3ansawa.runasp.net${charity.photoUrl}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
                         alt={charity.charityName}
                         className="w-full h-full object-cover"
                       />

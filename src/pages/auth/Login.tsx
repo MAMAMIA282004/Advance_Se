@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
@@ -10,6 +10,7 @@ import Cookies from 'js-cookie';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -17,7 +18,7 @@ const Login = () => {
     e.preventDefault();
     const userData: IUserData = await LoginCall(email, password);
     Cookies.set('UserData', JSON.stringify(userData), { path: '/', expires: Date.parse(userData.expireAt), secure: true, sameSite: 'Strict' });
-    window.location.reload();
+    navigate('/');
   };
 
   return (

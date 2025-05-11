@@ -7,14 +7,16 @@ import { Heart, Phone, Mail, MapPin, Send, DollarSign, ChevronLeftIcon, ChevronR
 import { Textarea } from '@/components/ui/textarea';
 import { GetCharityByUsername } from '@/Api/charities/charities';
 import { ICharityBranch, ICharityDonateForm, ICharityHelpForm, ICharityPost, ICharityProfile } from '@/interfaces/interfaces';
-import { GetCharityPosts } from '@/Api/posts/posts';
+import { CreateComment, DeleteComment, EditComment, GetCharityPosts } from '@/Api/posts/posts';
 import { GetCharityBranches } from '@/Api/branches/branches';
 import { Slide } from 'react-slideshow-image';
 import { DonateWithItem, DonateWithMoney } from '@/Api/donations/donations';
 import { RequestHelp } from '@/Api/helpRequest/helpRequests';
+import { GetUserData } from '@/lib/utils';
 
 const CharityProfile = () => {
   const userName = useLocation().pathname.split('/')[2];
+  const userData = GetUserData();
   const [charity, setCharity] = useState<ICharityProfile | null>({
     charityName: "",
     address: "",
@@ -27,7 +29,44 @@ const CharityProfile = () => {
   });
   const [charityPosts, setCharityPosts] = useState<ICharityPost[] | null>(null);
   const [charityBranches, setCharityBranches] = useState<ICharityBranch[] | null>(null);
-  const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState<Record<number, boolean>>({});
+
+  const handleEditComment = async (commentId: number) => {
+    const newContent = prompt("Edit your comment:");
+    if (newContent && newContent.trim()) {
+      try {
+        const response = await EditComment(commentId, { content: newContent });
+        if (response.status === 200) {
+          alert("Comment updated successfully!");
+        } else {
+          alert("Failed to update the comment. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error updating comment:", error);
+        alert("An error occurred while updating your comment. Please try again later.");
+      }
+    } else {
+      alert("Comment cannot be empty.");
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this comment?");
+    if (confirmDelete) {
+      try {
+        const response = await DeleteComment(commentId);
+        if (response.status === 200) {
+          alert("Comment deleted successfully!");
+        } else {
+          alert("Failed to update the comment. Please try again.");
+        }
+        console.log(`Delete comment with ID: ${commentId}`);
+      } catch (error) {
+        console.error("Error deleting comment:", error);
+        alert("Failed to delete the comment. Please try again.");
+      }
+    }
+  };
 
   const [newComment, setNewComment] = useState('');
   const [donationAmount, setDonationAmount] = useState<number | ''>('');
@@ -70,11 +109,24 @@ const CharityProfile = () => {
     image: []
   });
 
-  const handleNewComment = (postId: number) => {
-    if (newComment.trim()) {
-      alert(`Comment added: "${newComment}"`);
-      setNewComment('');
-      setIsCommenting({ ...isCommenting, [postId]: false });
+  const handleNewComment = async (postId: number) => {
+    if (newComment.trim() && userData?.roles[0] === "user") {
+      try {
+        const formData = new FormData();
+        formData.append('PostId', postId.toString());
+        formData.append('Content', newComment);
+        const response = await CreateComment(formData);
+        if (response.status === 200) {
+          alert('Comment added successfully!');
+          setNewComment('');
+          setIsCommenting({ ...isCommenting, [postId]: false });
+        } else {
+          alert('Failed to add comment. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error adding comment:', error);
+        alert('An error occurred while adding your comment. Please try again later.');
+      }
     }
   };
 
@@ -162,7 +214,7 @@ const CharityProfile = () => {
         {charity !== null && <div className="relative">
           <div className="h-64 md:h-80 w-full overflow-hidden">
             <img
-              src={charity.wallpaperPhotoUrl ? `https://ma3ansawa.runasp.net/${charity.wallpaperPhotoUrl}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
+              src={charity.wallpaperPhotoUrl ? `https://ma3ansawa.runasp.net${charity.wallpaperPhotoUrl}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
               alt={`${charity.charityName} cover`}
               className="w-full h-full object-cover"
             />
@@ -173,7 +225,7 @@ const CharityProfile = () => {
               <div className="rounded-xl p-4 md:p-6 flex flex-col items-center gap-4 md:gap-8">
                 <div className="w-48 h-48 rounded-full overflow-hidden">
                   <img
-                    src={charity.profilePhotoURL ? `https://ma3ansawa.runasp.net/${charity.profilePhotoURL}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
+                    src={charity.profilePhotoURL ? `https://ma3ansawa.runasp.net${charity.profilePhotoURL}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
                     alt={charity.charityName}
                     className="w-full h-full object-cover"
                   />
@@ -191,7 +243,7 @@ const CharityProfile = () => {
         {/* Tabs Section */}
         <div className="container mx-auto px-4 py-8">
           <Tabs defaultValue="home">
-            <div className="border-b">
+            {((userData && userData?.roles[0] === 'charity' && userData?.userName !== userName)) && <div className="border-b">
               <TabsList className="bg-transparent justify-evenly h-auto mb-0 w-full">
                 <TabsTrigger value="home" className="rounded-none border-b-2 border-transparent data-[state=active]:border-hope-orange data-[state=active]:bg-transparent">
                   Home
@@ -206,7 +258,7 @@ const CharityProfile = () => {
                   Contact
                 </TabsTrigger>
               </TabsList>
-            </div>
+            </div>}
 
             {/* Home Tab Content */}
             <TabsContent value="home">
@@ -257,7 +309,7 @@ const CharityProfile = () => {
                           <div className="flex items-center mb-4">
                             <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
                               <img
-                                src={charity.profilePhotoURL ? `https://ma3ansawa.runasp.net/${charity.profilePhotoURL}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
+                                src={charity.profilePhotoURL ? `https://ma3ansawa.runasp.net${charity.profilePhotoURL}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
                                 alt={charity.userName}
                                 className="w-full h-full object-cover"
                               />
@@ -293,7 +345,7 @@ const CharityProfile = () => {
                               >
                                 {post.photos.map((url, index) => (
                                   <div key={index} className='w-full flex justify-center h-[35rem]'>
-                                    <img draggable={false} src={`https://ma3ansawa.runasp.net/${url.imgName}`} alt="" className='w-full object-cover' />
+                                    <img draggable={false} src={`https://ma3ansawa.runasp.net${url.imgName}`} alt="" className='w-full object-cover' />
                                   </div>
                                 ))}
                               </Slide>
@@ -301,7 +353,7 @@ const CharityProfile = () => {
                             :
                             <>
                               <img
-                                src={post.photos[0].imgName ? `https://ma3ansawa.runasp.net/${post.photos[0].imgName}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
+                                src={post.photos[0].imgName ? `https://ma3ansawa.runasp.net${post.photos[0].imgName}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
                                 alt="Post attachment"
                                 className='w-full h-[35rem] object-cover'
                               />
@@ -331,23 +383,65 @@ const CharityProfile = () => {
                               {post.comments.map((comment) => (
                                 <div key={comment.id} className="flex mb-4">
                                   <img
-                                    src={comment.user_PhotoUrl ? `https://ma3ansawa.runasp.net/${comment.user_PhotoUrl}` : `https://ui-avatars.com/api/?name=${comment.user_FullName}`}
+                                    src={comment.user_PhotoUrl ? `https://ma3ansawa.runasp.net${comment.user_PhotoUrl}` : `https://ui-avatars.com/api/?name=${comment.user_FullName}`}
                                     alt={comment.user_FullName}
                                     className="w-8 h-8 rounded-full bg-gray-300 mr-3 flex-shrink-0 object-cover"
                                   />
                                   <div className="bg-gray-50 rounded-lg p-3 flex-grow">
                                     <div className="flex justify-between">
-                                      <p className="font-medium text-gray-600 text-sm">{comment.user_FullName}</p>
-                                      <p className="text-xs text-gray-500">{comment.createdAt}</p>
+                                      <div className="">
+                                        <p className="font-medium text-gray-600 text-sm">{comment.user_FullName}</p>
+                                        <p className="text-xs text-gray-500">{comment.createdAt}</p>
+                                      </div>
+                                      {comment.user_FullName === userData?.fullName && <div className="relative">
+                                        <Button
+                                          variant="ghost"
+                                          className="p-2"
+                                          onClick={() => setIsMenuOpen((prev) => ({ ...prev, [comment.id]: !prev[comment.id] }))}
+                                        >
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-5 w-5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M12 6v.01M12 12v.01M12 18v.01"
+                                            />
+                                          </svg>
+                                        </Button>
+                                        {isMenuOpen[comment.id] && (
+                                          <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg">
+                                            <Button
+                                              variant="ghost"
+                                              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                                              onClick={() => handleEditComment(comment.id)}
+                                            >
+                                              Edit
+                                            </Button>
+                                            <Button
+                                              variant="ghost"
+                                              className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
+                                              onClick={() => handleDeleteComment(comment.id)}
+                                            >
+                                              Delete
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </div>}
                                     </div>
                                     <p className="mt-1 text-lg">{comment.content}</p>
-                                    <div className="flex justify-end">
+                                    {comment.user_FullName !== userData?.fullName && <div className="flex justify-end">
                                       <Button
                                         className="hover:bg-transparent mt-1"
                                       >
                                         Report
                                       </Button>
-                                    </div>
+                                    </div>}
                                   </div>
                                 </div>
                               ))}

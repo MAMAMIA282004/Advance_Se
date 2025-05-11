@@ -69,7 +69,7 @@ const Home = () => {
 
       {/* Featured Charities */}
       <section className="py-10">
-        <div className="container text-center lg:text-start mx-auto flex flex-col lg:flex-row items-start justify-between items-center gap-8">
+        <div className="container text-center lg:text-start mx-auto flex flex-col lg:flex-row justify-between items-center gap-8">
           <div className="lg:w-1/2 space-y-3">
             <h2 className="text-4xl font-extrabold text-hope-orange">Who We Are</h2>
             <h3 className="text-xl font-semibold">Introduction</h3>
