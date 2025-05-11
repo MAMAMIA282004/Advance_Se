@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, X, Search, Settings } from 'lucide-react';
+import { Heart, Menu, X, Search, Settings, LogOut } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -77,14 +77,14 @@ const Header = () => {
                 <>
                   {userData?.roles.length > 1 ?
                     <Link to="/dashboard/admin" className="text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
-                      Admin
+                      Admin Dashboard
                     </Link>
                     : userData?.roles[0] === 'charity' ?
                       <Link to="/dashboard/charity" className="text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
-                        Charity
+                        Charity Dashboard
                       </Link> :
                       < Link to="/dashboard/user" className="text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
-                        User
+                        User Dashboard
                       </Link >
                   }
                   <Button type='submit' name='logout' variant='ghost' className="text-hope-dark-gray hover:bg-white px-2 py-6 justify-start text-base hover:text-hope-orange transition-colors" onClick={() => Logout()}>Logout</Button>
@@ -132,20 +132,27 @@ const Header = () => {
                       </Button>
                     </div>
                   ) : (
-                    <DropdownMenu open={menuOpen} onOpenChange={ChangeMenuState} >
-                      <DropdownMenuTrigger className="bg-hope-orange hover:bg-hope-dark-orange text-white px-3 py-1 rounded-lg focus:outline-none">Dashboard</DropdownMenuTrigger>
-                      <DropdownMenuContent className='flex flex-col'>
-                        <Link to="/dashboard/user" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
-                          User
+                    <div className="flex flex-col gap-3">
+                      {userData?.roles.length > 1 ?
+                        <Link to="/dashboard/admin" className="flex gap-3 items-center text-lg text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
+                          <Settings />
+                          <p>Admin Dashboard</p>
                         </Link>
-                        <Link to="/dashboard/charity" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
-                          Charity
-                        </Link>
-                        <Link to="/dashboard/admin" className="text-hope-dark-gray px-1 py-2 hover:text-hope-orange transition-colors">
-                          Admin
-                        </Link>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        : userData?.roles[0] === 'charity' ?
+                          <Link to="/dashboard/charity" className="flex gap-3 items-center text-lg text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
+                            <Settings />
+                            <p>Charity Dashboard</p>
+                          </Link> :
+                          < Link to="/dashboard/user" className="flex gap-3 items-center text-lg text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
+                            <Settings />
+                            <p>User Dashboard</p>
+                          </Link >
+                      }
+                      <div className="flex gap-3 items-center text-lg text-hope-dark-gray px-3 py-3 hover:text-hope-orange transition-colors">
+                        <LogOut />
+                        <Button type='submit' name='logout' variant='ghost' className="text-hope-dark-gray p-0 hover:bg-white text-lg hover:text-hope-orange transition-colors" onClick={() => Logout()}>Logout</Button>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
