@@ -26,7 +26,7 @@ const Login = () => {
         {/* Left side with image - Hidden on mobile */}
         <div className="hidden md:flex md:flex-col md:w-1/2 bg-white p-10">
           <div className="flex justify-center items-center h-full">
-            <img src="public/lovable-uploads/login.png" alt="HopeGivers illustration" className="max-w-md w-full" />
+            <img src="/lovable-uploads/login.png" alt="HopeGivers illustration" className="max-w-md w-full" />
           </div>
         </div>
 
