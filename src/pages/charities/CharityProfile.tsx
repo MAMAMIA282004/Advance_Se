@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/components/layout/MainLayout';
-import { Heart, Phone, Mail, MapPin, Send, DollarSign, ChevronLeftIcon, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Heart, Phone, Mail, MapPin, Send, DollarSign, ChevronRight, ChevronLeft, EllipsisVertical } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { GetCharityByUsername } from '@/Api/charities/charities';
-import { ICharityBranch, ICharityDonateForm, ICharityHelpForm, ICharityPost, ICharityProfile } from '@/interfaces/interfaces';
+import { ICharityBranch, ICharityPost, ICharityProfile } from '@/interfaces/interfaces';
 import { CreateComment, DeleteComment, EditComment, GetCharityPosts } from '@/Api/posts/posts';
 import { GetCharityBranches } from '@/Api/branches/branches';
 import { Slide } from 'react-slideshow-image';
@@ -306,18 +306,39 @@ const CharityProfile = () => {
                     charityPosts?.map((post) => (
                       <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                         <div className="p-6">
-                          <div className="flex items-center mb-4">
-                            <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
-                              <img
-                                src={charity.profilePhotoURL ? `https://ma3ansawa.runasp.net${charity.profilePhotoURL}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
-                                alt={charity.userName}
-                                className="w-full h-full object-cover"
-                              />
+                          <div className="flex justify-between">
+                            <div className="flex items-center mb-4">
+                              <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
+                                <img
+                                  src={charity.profilePhotoURL ? `https://ma3ansawa.runasp.net${charity.profilePhotoURL}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
+                                  alt={charity.userName}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div>
+                                <p className="font-medium">{charity.charityName}</p>
+                                <p className="text-xs text-gray-500">{new Date(post.createAt).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', hour12: true })}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium">{charity.charityName}</p>
-                              <p className="text-xs text-gray-500">{new Date(post.createAt).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', hour12: true })}</p>
-                            </div>
+                            {(userData && userData?.userName === post.userName) && <div className="relative">
+                              <Button
+                                variant="ghost"
+                                className="p-2"
+                                onClick={() => setIsMenuOpen((prev) => ({ ...prev, [post.id]: !prev[post.id] }))}
+                              >
+                                <EllipsisVertical />
+                              </Button>
+                              {isMenuOpen[post.id] && (
+                                <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg">
+                                  <a
+                                    href={`/manage-post/${post.id}`}
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  >
+                                    Manage Post
+                                  </a>
+                                </div>
+                              )}
+                            </div>}
                           </div>
 
                           <p className="mb-4 text-lg">{post.content}</p>
@@ -740,7 +761,7 @@ const CharityProfile = () => {
                           <MapPin className="h-5 w-5 text-hope-orange mt-0.5" />
                           <div>
                             <p className="font-medium">Address</p>
-                            <p className="text-gray-600">123 Charity St, San Francisco, CA 94103</p>
+                            <p className="text-gray-600">{charity.address}</p>
                           </div>
                         </div>
 

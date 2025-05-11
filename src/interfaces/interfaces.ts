@@ -87,3 +87,20 @@ export interface ICharityHelpForm {
   address: string;
   photos?: File[] | null;
 }
+
+export interface IAdminUser {
+  id: string;
+  fullName: string;
+  email: string;
+  createAt: string;
+}
+
+export interface IAdminCharity {
+  id: string;
+  charityName: string;
+  createAt: string;
+  description: string;
+  documentURL: string;
+  email: string;
+  status: string;
+}
