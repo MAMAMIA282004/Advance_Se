@@ -243,7 +243,7 @@ const CharityProfile = () => {
         {/* Tabs Section */}
         <div className="container mx-auto px-4 py-8">
           <Tabs defaultValue="home">
-            {((userData && userData?.roles[0] === 'charity' && userData?.userName !== userName)) && <div className="border-b">
+            {((userData && userData?.userName !== userName)) && <div className="border-b">
               <TabsList className="bg-transparent justify-evenly h-auto mb-0 w-full">
                 <TabsTrigger value="home" className="rounded-none border-b-2 border-transparent data-[state=active]:border-hope-orange data-[state=active]:bg-transparent">
                   Home
