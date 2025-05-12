@@ -170,7 +170,7 @@ export interface ICharityHelpRequest {
 
 export interface IReport {
   id: number;
-  type: "Comment" | "Post" | "User" | "Charity";
+  type: "Comment" | "Post";
   reason: string;
   reporterName: string;
   targetId: number;

@@ -13,6 +13,7 @@ import { Slide } from 'react-slideshow-image';
 import { DonateWithItem, DonateWithMoney } from '@/Api/donations/donations';
 import { RequestHelp } from '@/Api/helpRequest/helpRequests';
 import { GetUserData } from '@/lib/utils';
+import { CreateReport } from '@/Api/reports/reports';
 
 const CharityProfile = () => {
   const userName = useLocation().pathname.split('/')[2];
@@ -207,6 +208,29 @@ const CharityProfile = () => {
     setIsCommenting({ ...isCommenting, [postId]: !isCommenting[postId] });
   };
 
+  const handleReport = async (type: 'Post' | 'Comment', id: number) => {
+    const confirmReport = window.confirm(`Are you sure you want to report this ${type}?`);
+    if (confirmReport) {
+      try {
+        // Replace with your API call for reporting
+        const response = await CreateReport({
+          reason: "Sexual Content!",
+          targetId: id,
+          type: type
+        });
+
+        if (response.status === 200) {
+          alert(`${type} reported successfully!`);
+        } else {
+          alert(`Failed to report the ${type}. Please try again.`);
+        }
+      } catch (error) {
+        console.error(`Error reporting ${type}:`, error);
+        alert(`An error occurred while reporting the ${type}. Please try again later.`);
+      }
+    }
+  };
+
   return (
     <>
       <MainLayout>
@@ -393,6 +417,7 @@ const CharityProfile = () => {
                             <Button
                               variant="outline"
                               className="text-red-500"
+                              onClick={() => handleReport('Post', post.id)}
                             >
                               Report
                             </Button>
@@ -459,6 +484,7 @@ const CharityProfile = () => {
                                     {comment.user_FullName !== userData?.fullName && <div className="flex justify-end">
                                       <Button
                                         className="hover:bg-transparent mt-1"
+                                        onClick={() => handleReport('Comment', comment.id)}
                                       >
                                         Report
                                       </Button>

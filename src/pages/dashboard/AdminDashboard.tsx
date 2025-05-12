@@ -29,6 +29,7 @@ import { ApproveCharity, DeleteUser, GetCharitiesData, GetUsersData } from '@/Ap
 import { IAdminCharity, IAdminUser, IReport } from '@/interfaces/interfaces';
 import { Link } from 'react-router-dom';
 import { GetAllReports } from '@/Api/reports/reports';
+import { DeleteComment, DeletePost } from '@/Api/posts/posts';
 
 const AdminDashboard = () => {
   const [charities, setCharities] = useState<IAdminCharity[]>([])
@@ -165,30 +166,26 @@ const AdminDashboard = () => {
     setViewDialogOpen(true);
   };
 
-  const handleReportAction = (id: number, action: 'removeContent' | 'removeAll') => {
-    if (action === 'removeContent') {
-      const updatedReports = reports.map(report => {
-        if (report.id === id) {
-          return { ...report, status: 'resolved' };
-        }
-        return report;
-      });
-      setReports(updatedReports);
-      setReportActionDialogOpen(false);
-      alert('Content has been removed.');
-    } else if (action === 'removeAll') {
-      const updatedReports = reports.map(report => {
-        if (report.id === id) {
-          return { ...report, status: 'resolved' };
-        }
-        return report;
-      });
-      setReports(updatedReports);
-      setReportActionDialogOpen(false);
-      alert('Content and user/charity account have been removed.');
+  const handleReportAction = async (id: number, type: "Comment" | "Post") => {
+    const confirmAction = window.confirm("Are you sure you want to remove this content?");
+    if (!confirmAction) return;
+    try {
+      let response;
+      if (type == "Comment")
+        response = await DeleteComment(id);
+      else
+        response = await DeletePost(id);
+      if (response.status == 200) {
+        alert(`Content with id: ${id} removed successfully`);
+        setReports(reports.filter(report => report.id !== id));
+      }
+      else {
+        alert("Failed to remove content. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error removing content:", error);
+      alert("Failed to remove content. Please try again.");
     }
-    // Removed unused function definition
-    throw new Error('Function not implemented.');
   }
 
   return (
@@ -609,7 +606,6 @@ const AdminDashboard = () => {
                   <div className="mt-2 space-y-2">
                     <p><strong>Type:</strong> {selectedReport.type.charAt(0).toUpperCase() + selectedReport.type.slice(1)}</p>
                     <p><strong>Reported by:</strong> {selectedReport.reporterName}</p>
-                    <p><strong>Reported:</strong> {selectedReport.type}</p>
                     <p><strong>Date:</strong> {selectedReport.createdAt}</p>
                     <p><strong>Reason:</strong> {selectedReport.reason}</p>
                   </div>
@@ -645,30 +641,15 @@ const AdminDashboard = () => {
           </DialogHeader>
 
           <div className="py-4">
-            <p className="mb-4">
-              This will handle the reported {selectedReport?.type}. Please select an appropriate action:
-            </p>
-
             <div className="space-y-4">
               <Button
                 variant="outline"
-                className="w-full justify-start text-left"
-                onClick={() => selectedReport && handleReportAction(selectedReport.id, 'removeContent')}
+                className="w-full h-12"
+                onClick={() => selectedReport && handleReportAction(selectedReport.targetId, selectedReport.type)}
               >
-                <div>
-                  <p className="font-medium">Remove Content Only</p>
+                <div className="flex flex-col">
+                  <p className="font-medium ">Remove Content Only</p>
                   <p className="text-sm text-gray-500">Delete just the reported {selectedReport?.type}</p>
-                </div>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="w-full justify-start text-left"
-                onClick={() => selectedReport && handleReportAction(selectedReport.id, 'removeAll')}
-              >
-                <div>
-                  <p className="font-medium">Remove Content & User/Charity</p>
-                  <p className="text-sm text-gray-500">Delete the content and block the account</p>
                 </div>
               </Button>
             </div>

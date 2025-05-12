@@ -39,3 +39,17 @@ export function DeleteComment(id: number) {
       },
     })
 }
+
+export function DeletePost(id: number) {
+  return axiosInstance
+    .delete(`/Post/Delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${GetUserData()?.token}`,
+      },
+    })
+    .then((response) => response)
+    .catch((error) => {
+      console.error('Error deleting post:', error);
+      throw error;
+    });
+}
