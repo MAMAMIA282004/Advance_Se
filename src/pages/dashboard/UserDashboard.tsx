@@ -19,13 +19,22 @@ import { IChangePasswordForm, IUserData, IUserDonation, IUserHelpRequest } from 
 import { UpdateUserProfile } from '@/Api/user/user';
 import { ChangeHelpRequestStatus, GetUserHelpRequests } from '@/Api/helpRequest/helpRequests';
 import { ChangeDonationStatus, GetUserDonationRequests } from '@/Api/donations/donations';
+import { DialogFooter, Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog';
 
 const UserDashboard = () => {
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedDonation, setSelectedDonation] = useState<IUserDonation | null>(null);
+  const [selectedHelpRequest, setSelectedHelpRequest] = useState<IUserHelpRequest | null>(null);
   const [profileData, setProfileData] = useState<IUserData>();
   const [donationRequests, setDonationRequests] = useState<IUserDonation[]>([]);
   const [useHelpRequests, setHelpRequests] = useState<IUserHelpRequest[]>([]);
   const [passwordData, setPasswordData] = useState<IChangePasswordForm>();
   const [profilePhoto, setProfilePhoto] = useState<File | null>(profileData?.profilePhotoUrl ? new File([], profileData?.profilePhotoUrl) : null);
+
+  const handleOpenDialog = (isOpen: boolean) => {
+    setViewDialogOpen(isOpen);
+  };
 
   const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -331,7 +340,7 @@ const UserDashboard = () => {
                           <TableCell>{request.createdAt}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedDonation(request); setSelectedHelpRequest(null); handleOpenDialog(true); }}>
                                 <Eye className="h-4 w-4" />
                               </Button>
                               {request.status === 'Pending' && (
@@ -386,11 +395,8 @@ const UserDashboard = () => {
                           <TableCell>{request.createdAt}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedHelpRequest(request); setSelectedDonation(null); handleOpenDialog(true); }}>
                                 <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <FileText className="h-4 w-4" />
                               </Button>
                               {request.status === 'Pending' && (
                                 <Button
@@ -414,6 +420,65 @@ const UserDashboard = () => {
           </Tabs>
         </div>
       </div>
+      {/* View Dialog for Charity/User/Report details */}
+      <Dialog open={viewDialogOpen} onOpenChange={handleOpenDialog} >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedDonation ? 'Donation Details' : 'Help Request Details'}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedDonation ? 'View donation information and verification status' : 'View help request information and verification status'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            {selectedDonation && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold">Donation Information</h3>
+                  <div className="mt-2 space-y-2">
+                    <p><strong>ID:</strong> {selectedDonation.id}</p>
+                    <p><strong>Charity Name:</strong> {selectedDonation.charityName}</p>
+                    <p><strong>Email:</strong> {selectedDonation.charityName}</p>
+                    <p><strong>Description:</strong> {selectedDonation.description}</p>
+                    <p><strong>Type:</strong> {selectedDonation.type}</p>
+                    <p><strong>Amount:</strong> {selectedDonation.amount}</p>
+                    <p><strong>Status:</strong> {selectedDonation.status}</p>
+                    <p><strong>Registration Date:</strong>
+                      {new Date(selectedDonation.createdAt).toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false, })}
+                    </p>
+                    <p><strong>Donation Verified:</strong> {selectedDonation.status === "Approved" ? 'Yes' : 'No'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedHelpRequest && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold">Help request Information</h3>
+                  <div className="mt-2 space-y-2">
+                    <p><strong>ID:</strong> {selectedHelpRequest.id}</p>
+                    <p><strong>Charity Name:</strong> {selectedHelpRequest.charityName}</p>
+                    <p><strong>Description:</strong> {selectedHelpRequest.description}</p>
+                    <p><strong>Address:</strong> {selectedHelpRequest.address}</p>
+                    <p><strong>Status:</strong> {selectedHelpRequest.status}</p>
+                    <p><strong>Registration Date:</strong>
+                      {new Date(selectedHelpRequest.createdAt).toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false, })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setViewDialogOpen(false); }}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </MainLayout >
   );
 };

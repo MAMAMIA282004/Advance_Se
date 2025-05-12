@@ -2,8 +2,34 @@ import MainLayout from '@/components/layout/MainLayout';
 import { ArrowLeft, CircleCheck } from 'lucide-react';
 import React from 'react';
 import { IconLeft } from 'react-day-picker';
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { ChangeDonationStatus } from '@/Api/donations/donations';
 
 const DonationSuccess: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const updateDonationStatus = async () => {
+      const donationId = searchParams.get('donationId');
+
+      if (donationId) {
+        try {
+          const data = await ChangeDonationStatus(Number.parseInt(donationId), 'Approved');
+          if (data.status === 200) {
+            console.log('Donation status updated:', data);
+          }
+          else {
+            console.error('Failed to update donation status:', data);
+          }
+        } catch (error) {
+          console.error('Error updating donation status:', error);
+        }
+      }
+    };
+
+    updateDonationStatus();
+  }, []);
+
   return (
     <MainLayout>
       <main style={{ textAlign: 'center', padding: '2rem', fontFamily: 'Arial, sans-serif', color: '#333' }}>
