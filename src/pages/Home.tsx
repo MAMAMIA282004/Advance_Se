@@ -25,8 +25,7 @@ const Home = () => {
     <MainLayout>
       {/* Hero Section */}
       <section className="hero-pattern">
-        <div className='relative w-full flex items-center h-fit'>
-          <img src="/cover.png" alt="coverPhoto" draggable={false} className='absolute object-cover w-full h-full' />
+        <div className='relative w-full flex items-center h-[calc(100vh-3.5rem)]' style={{ backgroundImage: "url('/cover.png')", backgroundRepeat: "no-repeat", backgroundSize: "cover" }}>
           <div className="container mx-auto z-10 py-32">
             <div className="md:w-1/2 mb-10 md:mb-0">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 text-center md:text-start">
@@ -107,7 +106,7 @@ const Home = () => {
         </div>
       </section>
 
-    </MainLayout>
+    </MainLayout >
   );
 };
 

@@ -775,7 +775,7 @@ const CharityDashboard = () => {
                             <img
                               src={`https://ma3ansawa.runasp.net${profileData?.profilePhotoUrl}`}
                               alt={profileData?.userName}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                             />
                           </div>
                           <div>

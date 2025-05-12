@@ -390,7 +390,7 @@ const CharityProfile = () => {
                               >
                                 {post.photos.map((url, index) => (
                                   <div key={index} className='w-full flex justify-center h-[35rem]'>
-                                    <img draggable={false} src={`https://ma3ansawa.runasp.net${url.imgName}`} alt="" className='w-full object-cover' />
+                                    <img draggable={false} src={`https://ma3ansawa.runasp.net${url.imgName}`} alt="" className='w-full object-contain' />
                                   </div>
                                 ))}
                               </Slide>
