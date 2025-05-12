@@ -196,14 +196,23 @@ const AdminDashboard = () => {
 
           <Tabs defaultValue="charities">
             <TabsList className="mb-8 bg-white flex justify-around">
-              <TabsTrigger value="charities" className="flex items-center gap-2">
-                <Building className="h-4 w-4" /> Manage Charities
+              <TabsTrigger
+                value="charities"
+                className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none"
+              >
+                Manage Charities
               </TabsTrigger>
-              <TabsTrigger value="users" className="flex items-center gap-2">
-                <User className="h-4 w-4" /> Manage Users
+              <TabsTrigger
+                value="users"
+                className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none"
+              >
+                Manage Users
               </TabsTrigger>
-              <TabsTrigger value="reports" className="flex items-center gap-2">
-                <Flag className="h-4 w-4" /> Manage Reports
+              <TabsTrigger
+                value="reports"
+                className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none"
+              >
+                Manage Reports
               </TabsTrigger>
             </TabsList>
 

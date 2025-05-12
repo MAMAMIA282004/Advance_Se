@@ -379,11 +379,11 @@ const CharityDashboard = () => {
 
           <Tabs defaultValue="profile">
             <TabsList className="mb-8 bg-white flex justify-around">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="branches">Branches</TabsTrigger>
-              <TabsTrigger value="donations">Donation Requests</TabsTrigger>
-              <TabsTrigger value="help">Help Requests</TabsTrigger>
-              <TabsTrigger value="posts">Posts</TabsTrigger>
+              <TabsTrigger value="profile" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Profile</TabsTrigger>
+              <TabsTrigger value="branches" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Branches</TabsTrigger>
+              <TabsTrigger value="donations" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Donations</TabsTrigger>
+              <TabsTrigger value="help" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Help</TabsTrigger>
+              <TabsTrigger value="posts" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Posts</TabsTrigger>
             </TabsList>
 
             {/* Profile Tab */}

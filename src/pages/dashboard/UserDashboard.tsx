@@ -167,9 +167,9 @@ const UserDashboard = () => {
 
           <Tabs defaultValue="profile">
             <TabsList className="mb-8 bg-white flex justify-around">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="donations">Donation Requests</TabsTrigger>
-              <TabsTrigger value="help">Help Requests</TabsTrigger>
+              <TabsTrigger className='data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none' value="profile">Profile</TabsTrigger>
+              <TabsTrigger className='data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none' value="donations">Donation Requests</TabsTrigger>
+              <TabsTrigger className='data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none' value="help">Help Requests</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile">
