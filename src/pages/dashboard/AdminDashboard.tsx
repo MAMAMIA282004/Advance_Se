@@ -26,8 +26,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ApproveCharity, DeleteUser, GetCharitiesData, GetUsersData } from '@/Api/Admin/admin';
-import { IAdminCharity, IAdminUser } from '@/interfaces/interfaces';
+import { IAdminCharity, IAdminUser, IReport } from '@/interfaces/interfaces';
 import { Link } from 'react-router-dom';
+import { GetAllReports } from '@/Api/reports/reports';
 
 const AdminDashboard = () => {
   const [charities, setCharities] = useState<IAdminCharity[]>([])
@@ -68,40 +69,24 @@ const AdminDashboard = () => {
     fetchCharities();
   }, []);
 
-  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [reports, setReports] = useState([
-    {
-      id: 1,
-      type: 'comment',
-      reporter: 'Jane Smith',
-      reported: 'Bob Johnson',
-      content: 'Inappropriate language in comment',
-      date: '2023-05-10',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      type: 'post',
-      reporter: 'Michael Brown',
-      reported: 'Red Cross Local Chapter',
-      content: 'Misleading information in charity post',
-      date: '2023-05-09',
-      status: 'pending'
-    },
-    {
-      id: 3,
-      type: 'comment',
-      reporter: 'Sarah Williams',
-      reported: 'John Doe',
-      content: 'Harassment in comment section',
-      date: '2023-05-08',
-      status: 'pending'
-    },
-  ]);
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await GetAllReports();
+        setReports(response);
+      } catch (error) {
+        console.error("Error fetching reports:", error);
+      }
+    };
 
+    fetchReports();
+  }, []);
+
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const [reports, setReports] = useState<IReport[]>();
   const [selectedCharity, setSelectedCharity] = useState<IAdminCharity>(null);
   const [selectedUser, setSelectedUser] = useState<IAdminUser>(null);
-  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [selectedReport, setSelectedReport] = useState<IReport>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [reportActionDialogOpen, setReportActionDialogOpen] = useState(false);
   const handleSearchUser = (search: string) => {
@@ -512,12 +497,11 @@ const AdminDashboard = () => {
                         <TableHead>Reporter</TableHead>
                         <TableHead>Reported</TableHead>
                         <TableHead>Date</TableHead>
-                        <TableHead>Status</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {reports.map((report) => (
+                      {reports?.map((report) => (
                         <TableRow key={report.id}>
                           <TableCell>{report.id}</TableCell>
                           <TableCell>
@@ -525,20 +509,9 @@ const AdminDashboard = () => {
                               {report.type}
                             </Badge>
                           </TableCell>
-                          <TableCell>{report.reporter}</TableCell>
-                          <TableCell>{report.reported}</TableCell>
-                          <TableCell>{report.date}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={report.status === 'pending'
-                                ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-                                : 'bg-green-100 text-green-800 hover:bg-green-100'
-                              }
-                            >
-                              {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
-                            </Badge>
-                          </TableCell>
+                          <TableCell>{report.reporterName}</TableCell>
+                          <TableCell>{report.type}</TableCell>
+                          <TableCell>{report.createdAt}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button
@@ -548,19 +521,17 @@ const AdminDashboard = () => {
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              {report.status === 'pending' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedReport(report);
-                                    setReportActionDialogOpen(true);
-                                  }}
-                                  className="text-yellow-600 hover:text-yellow-700"
-                                >
-                                  <AlertTriangle className="h-4 w-4" />
-                                </Button>
-                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedReport(report);
+                                  setReportActionDialogOpen(true);
+                                }}
+                                className="text-yellow-600 hover:text-yellow-700"
+                              >
+                                <AlertTriangle className="h-4 w-4" />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -637,17 +608,17 @@ const AdminDashboard = () => {
                   <h3 className="font-semibold">Report Information</h3>
                   <div className="mt-2 space-y-2">
                     <p><strong>Type:</strong> {selectedReport.type.charAt(0).toUpperCase() + selectedReport.type.slice(1)}</p>
-                    <p><strong>Reported by:</strong> {selectedReport.reporter}</p>
-                    <p><strong>Reported:</strong> {selectedReport.reported}</p>
-                    <p><strong>Date:</strong> {selectedReport.date}</p>
-                    <p><strong>Status:</strong> {selectedReport.status}</p>
+                    <p><strong>Reported by:</strong> {selectedReport.reporterName}</p>
+                    <p><strong>Reported:</strong> {selectedReport.type}</p>
+                    <p><strong>Date:</strong> {selectedReport.createdAt}</p>
+                    <p><strong>Reason:</strong> {selectedReport.reason}</p>
                   </div>
                 </div>
 
                 <div>
                   <h3 className="font-semibold">Reported Content</h3>
                   <div className="mt-2 p-4 border rounded-md bg-gray-50">
-                    <p className="text-sm">{selectedReport.content}</p>
+                    <p className="text-sm">{selectedReport.targetId}</p>
                   </div>
                 </div>
               </div>

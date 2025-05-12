@@ -28,7 +28,7 @@ const DonationSuccess: React.FC = () => {
     };
 
     updateDonationStatus();
-  }, []);
+  }, [searchParams]);
 
   return (
     <MainLayout>

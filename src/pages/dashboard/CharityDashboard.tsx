@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -16,61 +16,98 @@ import {
 } from "@/components/ui/table";
 import { Eye, Edit, Trash, Plus, Check, X, MapPin } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
-import { Slider } from '@radix-ui/react-slider';
-import { Carousel } from '@/components/ui/carousel';
+import { ICharityBranch, ICharityDonation, ICharityHelpRequest, ICharityPost, ICharityProfile, ICharityProfileBranches, IUserData, IUserDonation, IUserHelpRequest } from '@/interfaces/interfaces';
+import { GetCharityBranches } from '@/Api/branches/branches';
+import { GetUserProfileData } from '@/Api/user/user';
+import { GetUserData } from '@/lib/utils';
+import { GetCharityDonationRequests } from '@/Api/donations/donations';
+import { GetCharityHelpRequests } from '@/Api/helpRequest/helpRequests';
+import { GetCharityPosts } from '@/Api/posts/posts';
 
 const CharityDashboard = () => {
-  const [profileData, setProfileData] = useState({
-    name: 'Red Cross Local Chapter',
-    email: 'info@redcross-local.org',
-    phone: '+1 (123) 456-7890',
-    address: '123 Charity St, Anytown, CA 94103',
-    description: 'We provide emergency assistance, disaster relief, and education in our local community.',
-    profileImage: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?auto=format&fit=crop&q=80&w=256&h=256',
-    wallpaperImage: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?auto=format&fit=crop&q=80&w=256&h=256',
-    socialLinks: {
-      website: 'https://example.org',
-      facebook: 'https://facebook.com',
-      twitter: 'https://twitter.com'
+
+  const [profileData, setProfileData] = useState<IUserData>();
+  const [branches, setBranches] = useState<ICharityProfileBranches[]>();
+  const [donationRequests, setDonationRequests] = useState<ICharityDonation[]>([]);
+  const [helpRequests, setHelpRequests] = useState<ICharityHelpRequest[]>([]);
+
+  const fetchProfileData = async () => {
+    try {
+      const response = await GetUserProfileData();
+      if (!response) {
+        throw new Error('Failed to fetch profile data');
+      }
+      setProfileData(response);
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
     }
-  });
+  };
 
-  // Sample data for branches
-  const [branches, setBranches] = useState([
-    { id: 1, name: 'Downtown Office', address: '123 Main St, Anytown', phone: '+1 (123) 456-7890', workHours: '9 AM - 5 PM' },
-    { id: 2, name: 'West Side Branch', address: '456 West Ave, Anytown', phone: '+1 (123) 123-4567', workHours: '8 AM - 4 PM' },
-  ]);
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
 
-  // Sample data for donation requests
-  const donationRequests = [
-    { id: 'DR123', donor: 'John Doe', type: 'Clothes', status: 'Pending', date: '2023-05-12' },
-    { id: 'DR124', donor: 'Jane Smith', type: 'Food Items', status: 'Approved', date: '2023-05-10' },
-    { id: 'DR125', donor: 'Bob Johnson', type: 'Furniture', status: 'Declined', date: '2023-05-08' },
-    { id: 'DR126', donor: 'Sarah Williams', type: 'Money', status: 'Completed', date: '2023-05-05', amount: '$250' },
-  ];
-
-  // Sample data for help requests
-  const helpRequests = [
-    { id: 'HR123', requester: 'Mary Taylor', description: 'Medical assistance needed', status: 'Pending', date: '2023-05-12' },
-    { id: 'HR124', requester: 'Steve Brown', description: 'Food supply for family of 4', status: 'Approved', date: '2023-05-10' },
-    { id: 'HR125', requester: 'Laura Wilson', description: 'Temporary shelter needed', status: 'Declined', date: '2023-05-08' },
-  ];
-
-  // Sample data for posts
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      content: 'We just completed our annual food drive! Thanks to all who contributed - we collected over 1000 pounds of food for local families.',
-      date: '2023-05-10',
-      images: ['https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=500', "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80&w=500", "/cover.png"]
-    },
-    {
-      id: 2,
-      content: 'Our volunteers spent the weekend rebuilding homes affected by the recent floods. Proud of our team!',
-      date: '2023-05-05',
-      images: ['https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80&w=500']
+  const fetchBranches = async () => {
+    try {
+      const response = await GetCharityBranches(GetUserData()?.userName);
+      if (!response) {
+        throw new Error('Failed to fetch branches');
+      }
+      setBranches(response);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
     }
-  ]);
+  };
+
+  useEffect(() => {
+    fetchBranches();
+  }, []);
+
+  const fetchDonationRequests = async () => {
+    try {
+      const response = await GetCharityDonationRequests();
+      if (!response) {
+        throw new Error('Failed to fetch branches');
+      }
+      setDonationRequests(response);
+    } catch (error) {
+      console.error('Error fetching donation requests:', error);
+    }
+  };
+
+  const fetchHelpRequests = async () => {
+    try {
+      const response = await GetCharityHelpRequests();
+      if (!response) {
+        throw new Error('Failed to fetch branches');
+      }
+      setHelpRequests(response);
+    } catch (error) {
+      console.error('Error fetching help requests:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDonationRequests();
+    fetchHelpRequests();
+  }, []);
+
+  const [posts, setPosts] = useState<ICharityPost[]>();
+  const fetchPosts = async () => {
+    try {
+      const response = await GetCharityPosts(GetUserData()?.userName);
+      if (!response) {
+        throw new Error('Failed to fetch branches');
+      }
+      setPosts(response);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const [newPost, setNewPost] = useState({
     content: '',
@@ -84,28 +121,20 @@ const CharityDashboard = () => {
   };
 
   const handleAddBranch = () => {
-    // Logic to add a branch
-    const newBranch = {
-      id: branches.length + 1,
-      name: 'New Branch',
-      address: 'Address',
-      phone: 'Phone',
-      workHours: 'Work Hours'
-    };
-    setBranches([...branches, newBranch]);
+
   };
 
-  const handleDeleteBranch = (id: number) => {
+  const handleDeleteBranch = (DelBranch: ICharityBranch) => {
     // Logic to delete branch
-    setBranches(branches.filter(branch => branch.id !== id));
+    setBranches(branches.filter(branch => branch !== DelBranch));
   };
 
-  const handleDonationAction = (id: string, action: 'approve' | 'decline') => {
+  const handleDonationAction = (id: number, action: 'approve' | 'decline') => {
     // Logic to approve or decline donation request
     alert(`Donation request ${id} ${action === 'approve' ? 'approved' : 'declined'} successfully!`);
   };
 
-  const handleHelpRequestAction = (id: string, action: 'approve' | 'decline') => {
+  const handleHelpRequestAction = (id: number, action: 'approve' | 'decline') => {
     // Logic to approve or decline help request
     alert(`Help request ${id} ${action === 'approve' ? 'approved' : 'declined'} successfully!`);
   };
@@ -120,7 +149,6 @@ const CharityDashboard = () => {
         date: new Date().toISOString().split('T')[0],
         images: ['https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&q=80&w=500']
       };
-      setPosts([post, ...posts]);
       setNewPost({ content: '', images: null });
     }
   };
@@ -165,7 +193,7 @@ const CharityDashboard = () => {
                   <CardContent className="flex flex-col items-center">
                     <div className="w-48 h-48 rounded-full overflow-hidden mb-6">
                       <img
-                        src={profileData.profileImage}
+                        src={profileData?.profilePhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.wallpaperPhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
                         alt="Charity Logo"
                         className="w-full h-full object-cover"
                       />
@@ -180,7 +208,7 @@ const CharityDashboard = () => {
                   <CardContent>
                     <div className="w-full h-48 rounded-lg mb-6">
                       <img
-                        src={profileData.wallpaperImage}
+                        src={profileData?.wallpaperPhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.wallpaperPhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
                         alt="Charity Logo"
                         className="w-full h-full object-cover"
                       />
@@ -203,8 +231,8 @@ const CharityDashboard = () => {
                         <input
                           id="name"
                           type="text"
-                          value={profileData.name}
-                          onChange={e => setProfileData({ ...profileData, name: e.target.value })}
+                          value={profileData?.userName}
+                          onChange={e => setProfileData({ ...profileData, fullName: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
@@ -214,7 +242,7 @@ const CharityDashboard = () => {
                         <input
                           id="email"
                           type="email"
-                          value={profileData.email}
+                          value={profileData?.email}
                           onChange={e => setProfileData({ ...profileData, email: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
@@ -225,8 +253,8 @@ const CharityDashboard = () => {
                         <input
                           id="phone"
                           type="tel"
-                          value={profileData.phone}
-                          onChange={e => setProfileData({ ...profileData, phone: e.target.value })}
+                          value={profileData?.phoneNumber}
+                          onChange={e => setProfileData({ ...profileData, phoneNumber: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         />
                       </div>
@@ -236,7 +264,7 @@ const CharityDashboard = () => {
                         <textarea
                           id="address"
                           rows={2}
-                          value={profileData.address}
+                          value={profileData?.address}
                           onChange={e => setProfileData({ ...profileData, address: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         ></textarea>
@@ -247,8 +275,6 @@ const CharityDashboard = () => {
                         <textarea
                           id="description"
                           rows={4}
-                          value={profileData.description}
-                          onChange={e => setProfileData({ ...profileData, description: e.target.value })}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                         ></textarea>
                       </div>
@@ -284,16 +310,16 @@ const CharityDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-6">
-                    {branches.map((branch) => (
-                      <Card key={branch.id}>
+                    {branches?.map((branch, idx) => (
+                      <Card key={idx}>
                         <CardHeader className="pb-2">
                           <div className="flex justify-between">
-                            <CardTitle>{branch.name}</CardTitle>
+                            <CardTitle>{branch?.address}</CardTitle>
                             <div className="flex gap-2">
                               <Button variant="outline" size="icon" className="h-7 w-7">
                                 <Edit className="h-3.5 w-3.5" />
                               </Button>
-                              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleDeleteBranch(branch.id)}>
+                              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleDeleteBranch(branch)}>
                                 <Trash className="h-3.5 w-3.5" />
                               </Button>
                             </div>
@@ -303,10 +329,10 @@ const CharityDashboard = () => {
                           <div className="space-y-3">
                             <div className="flex items-start gap-2">
                               <MapPin className="h-4 w-4 text-hope-orange mt-0.5" />
-                              <span>{branch.address}</span>
+                              <span>{branch?.address}</span>
                             </div>
                             <div>
-                              <strong className="text-sm">Phone:</strong> {branch.phone}
+                              <strong className="text-sm">Phone:</strong> {branch?.phoneNumber}
                             </div>
                           </div>
                         </CardContent>
@@ -337,17 +363,17 @@ const CharityDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {donationRequests.map((request) => (
+                      {donationRequests?.map((request) => (
                         <TableRow key={request.id}>
                           <TableCell>{request.id}</TableCell>
-                          <TableCell>{request.donor}</TableCell>
+                          <TableCell>{request.userName}</TableCell>
                           <TableCell>{request.type}</TableCell>
                           <TableCell>
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                               {request.status}
                             </span>
                           </TableCell>
-                          <TableCell>{request.date}</TableCell>
+                          <TableCell>{request.createdAt}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button variant="outline" size="sm">
@@ -406,14 +432,14 @@ const CharityDashboard = () => {
                       {helpRequests.map((request) => (
                         <TableRow key={request.id}>
                           <TableCell>{request.id}</TableCell>
-                          <TableCell>{request.requester}</TableCell>
+                          <TableCell>{request.userName}</TableCell>
                           <TableCell className="max-w-xs truncate">{request.description}</TableCell>
                           <TableCell>
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                               {request.status}
                             </span>
                           </TableCell>
-                          <TableCell>{request.date}</TableCell>
+                          <TableCell>{request.createdAt}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button variant="outline" size="sm">
@@ -485,21 +511,21 @@ const CharityDashboard = () => {
               <div className="mt-8 space-y-6">
                 <h3 className="text-xl font-semibold">Your Posts</h3>
 
-                {posts.map((post) => (
+                {posts?.map((post) => (
                   <Card key={post.id}>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full overflow-hidden">
                             <img
-                              src={profileData.profileImage}
-                              alt={profileData.name}
+                              src={`https://ma3ansawa.runasp.net${profileData?.profilePhotoUrl}`}
+                              alt={profileData?.userName}
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div>
-                            <div className="font-semibold">{profileData.name}</div>
-                            <div className="text-xs text-gray-500">{post.date}</div>
+                            <div className="font-semibold">{profileData?.userName}</div>
+                            <div className="text-xs text-gray-500">{post.createAt}</div>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -519,12 +545,12 @@ const CharityDashboard = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="mb-4">{post.content}</p>
-                      {post.images.length === 3 ?
+                      {post.photos.length === 3 ?
                         <div className="slide-container">
                           <Slide slidesToShow={2}>
-                            {post.images.map((url, index) => (
+                            {post.photos.map((url, index) => (
                               <div key={index} className='w-full flex justify-center h-full'>
-                                <img draggable={false} src={url} alt="" className='object-cover' />
+                                <img draggable={false} src={`https://ma3ansawa.runasp.net${url.imgName}`} alt="" className='object-cover' />
                               </div>
                             ))}
                           </Slide>
@@ -532,7 +558,7 @@ const CharityDashboard = () => {
                         :
                         <>
                           <img
-                            src={post.images[0]}
+                            src={`https://ma3ansawa.runasp.net${post.photos[0].imgName}`}
                             alt="Post attachment"
                             className='w-full max-h-[30rem] object-cover'
                           />

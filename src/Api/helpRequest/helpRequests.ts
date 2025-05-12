@@ -41,3 +41,17 @@ export function ChangeHelpRequestStatus(requestId: number, newStatus: string) {
       throw error;
     });
 }
+
+export function GetCharityHelpRequests() {
+  return axiosInstance
+    .get(`/HelpRequest/charity`, {
+      headers: {
+        Authorization: `Bearer ${GetUserData()?.token}`,
+      },
+    })
+    .then((response) => response.data.data)
+    .catch((error) => {
+      console.error('Error fetching charity help requests:', error);
+      throw error;
+    });
+}

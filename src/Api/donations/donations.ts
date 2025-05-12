@@ -60,3 +60,17 @@ export function ChangeDonationStatus(donationId: number, newStatus: string) {
       throw error;
     });
 }
+
+export function GetCharityDonationRequests() {
+  return axiosInstance
+    .get(`/Donations/charity`, {
+      headers: {
+        Authorization: `Bearer ${GetUserData()?.token}`,
+      },
+    })
+    .then((response) => response.data.data)
+    .catch((error) => {
+      console.error('Error fetching charity donation requests:', error);
+      throw error;
+    });
+}

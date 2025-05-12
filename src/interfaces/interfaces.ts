@@ -70,8 +70,14 @@ export interface ICharityBranch {
   phoneNumber: string;
   description: string;
   address: string;
-  photos: { imgName: string }[];
 }
+
+export interface ICharityProfileBranches {
+  phoneNumber: string;
+  description: string;
+  address: string;
+}
+
 
 export interface ICharityDonateForm {
   charityUserName: string;
@@ -138,4 +144,35 @@ export interface IUserHelpRequest {
   description: string;
   createdAt: string;
   status: string;
+}
+
+export interface ICharityDonation {
+  id: number;
+  amount: number | null;
+  charityName: string | null;
+  createdAt: string;
+  description: string;
+  photoUrls: string[];
+  status: string;
+  type: "Product" | "Monetary";
+  userName: string;
+}
+
+export interface ICharityHelpRequest {
+  id: number;
+  userName: string;
+  description: string;
+  address: string;
+  createdAt: string;
+  photoUrls: string[];
+  status: string;
+}
+
+export interface IReport {
+  id: number;
+  type: "Comment" | "Post" | "User" | "Charity";
+  reason: string;
+  reporterName: string;
+  targetId: number;
+  createdAt: string;
 }
