@@ -7,6 +7,7 @@ export interface IUserData {
   userName: string,
   email: string,
   phoneNumber: string,
+  address: string,
   fullName: string,
   profilePhotoUrl: string,
   wallpaperPhotoUrl: string,
@@ -102,5 +103,39 @@ export interface IAdminCharity {
   description: string;
   documentURL: string;
   email: string;
+  status: string;
+}
+
+export interface IUpdateProfileForm {
+  FullName: string;
+  Email: string;
+  Phone: string;
+  Address: string;
+  ProfilePhoto: string | null;
+  WallpaperPhoto: string | null;
+}
+
+export interface IChangePasswordForm {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface IUserDonation {
+  id: number;
+  amount: number | null;
+  charityName: string;
+  createdAt: string;
+  description: string;
+  type: "Product" | "Monetary";
+  status: string;
+}
+
+export interface IUserHelpRequest {
+  id: number;
+  charityName: string;
+  address: string;
+  description: string;
+  createdAt: string;
   status: string;
 }

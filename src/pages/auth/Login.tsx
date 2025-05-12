@@ -10,7 +10,6 @@ import Cookies from 'js-cookie';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -18,7 +17,7 @@ const Login = () => {
     e.preventDefault();
     const userData: IUserData = await LoginCall(email, password);
     Cookies.set('UserData', JSON.stringify(userData), { path: '/', expires: Date.parse(userData.expireAt), secure: true, sameSite: 'Strict' });
-    navigate('/');
+    window.location.href = '/';
   };
 
   return (

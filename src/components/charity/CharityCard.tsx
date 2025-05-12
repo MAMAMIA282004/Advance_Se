@@ -13,7 +13,7 @@ const CharityCard: React.FC<{ charity: IHomeCharities }> = ({ charity }: { chari
           <img
             src={charity.photoUrl ? `https://ma3ansawa.runasp.net/${charity.photoUrl}` : `https://ui-avatars.com/api/?name=${charity.charityName}`}
             alt={`${charity.userName} logo`}
-            className="object-cover w-full"
+            className="object-cover w-full lg:h-[25rem] h-[20rem]"
           />
           <div>
             <h3 className="font-semibold text-lg line-clamp-1">{charity.charityName}</h3>

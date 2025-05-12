@@ -10,3 +10,34 @@ export function RequestHelp(data: FormData) {
       },
     })
 }
+
+export function GetUserHelpRequests() {
+  return axiosInstance
+    .get(`/HelpRequest/user`, {
+      headers: {
+        Authorization: `Bearer ${GetUserData()?.token}`,
+      },
+    })
+    .then((response) => response.data.data)
+    .catch((error) => {
+      console.error('Error fetching charity branches:', error)
+      throw error
+    })
+}
+
+export function ChangeHelpRequestStatus(requestId: number, newStatus: string) {
+  return axiosInstance
+    .put("/HelpRequest/UpdateHelpRequest", {
+      requestId,
+      newStatus,
+    }, {
+      headers: {
+        Authorization: `Bearer ${GetUserData()?.token}`,
+      },
+    })
+    .then((response) => response)
+    .catch((error) => {
+      console.error('Error fetching charity branches:', error);
+      throw error;
+    });
+}
