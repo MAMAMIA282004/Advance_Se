@@ -14,15 +14,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, Edit, Trash, Plus, Check, X, MapPin } from 'lucide-react';
+import { Eye, Edit, Trash, Plus, Check, X, FileIcon } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
-import { ICharityBranch, ICharityDonation, ICharityHelpRequest, ICharityPost, ICharityProfile, ICharityProfileBranches, IUserData, IUserDonation, IUserHelpRequest } from '@/interfaces/interfaces';
-import { GetCharityBranches } from '@/Api/branches/branches';
-import { GetUserProfileData } from '@/Api/user/user';
+import { IChangePasswordForm, ICharityBranch, ICharityDonation, ICharityHelpRequest, ICharityPost, ICharityProfile, ICharityProfileBranches, IUserData, IUserDonation, IUserHelpRequest } from '@/interfaces/interfaces';
+import { CreateBranch, DeleteBranch, EditBranch, GetCharityBranches } from '@/Api/branches/branches';
+import { GetUserProfileData, UpdateUserPassword, UpdateUserProfile } from '@/Api/user/user';
 import { GetUserData } from '@/lib/utils';
-import { GetCharityDonationRequests } from '@/Api/donations/donations';
-import { GetCharityHelpRequests } from '@/Api/helpRequest/helpRequests';
-import { GetCharityPosts } from '@/Api/posts/posts';
+import { ChangeDonationStatus, GetCharityDonationRequests } from '@/Api/donations/donations';
+import { ChangeHelpRequestStatus, GetCharityHelpRequests } from '@/Api/helpRequest/helpRequests';
+import { AddPost, DeletePost, EditPost, GetCharityPosts } from '@/Api/posts/posts';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Link } from 'react-router-dom';
 
 const CharityDashboard = () => {
 
@@ -30,7 +33,21 @@ const CharityDashboard = () => {
   const [branches, setBranches] = useState<ICharityProfileBranches[]>();
   const [donationRequests, setDonationRequests] = useState<ICharityDonation[]>([]);
   const [helpRequests, setHelpRequests] = useState<ICharityHelpRequest[]>([]);
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(profileData?.profilePhotoUrl ? new File([], profileData?.profilePhotoUrl) : null);
+  const [wallpaperPhoto, setWallpaperPhoto] = useState<File | null>(profileData?.wallpaperPhotoUrl ? new File([], profileData?.wallpaperPhotoUrl) : null);
+  const [posts, setPosts] = useState<ICharityPost[]>();
+  const [selectedBranch, setSelectedBranch] = useState<ICharityProfileBranches | null>(null);
+  const [selectedDonation, setSelectedDonation] = useState<ICharityDonation>();
+  const [selectedHelpRequest, setSelectedHelpRequest] = useState<ICharityHelpRequest>();
+  const [passwordData, setPasswordData] = useState<IChangePasswordForm>();
+  const [branchDialogOpen, setBranchDialogOpen] = useState(false);
+  const [detailsDialog, setDetailsDialog] = useState(false);
+  const [isEditingBranch, setIsEditingBranch] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<ICharityPost>();
+  const [postDialog, setPostDialog] = useState(false);
+  const [postImages, setPostImages] = useState<File[]>();
 
+  //#region fetching data
   const fetchProfileData = async () => {
     try {
       const response = await GetUserProfileData();
@@ -42,7 +59,6 @@ const CharityDashboard = () => {
       console.error('Error fetching profile data:', error);
     }
   };
-
   useEffect(() => {
     fetchProfileData();
   }, []);
@@ -58,7 +74,6 @@ const CharityDashboard = () => {
       console.error('Error fetching branches:', error);
     }
   };
-
   useEffect(() => {
     fetchBranches();
   }, []);
@@ -74,6 +89,9 @@ const CharityDashboard = () => {
       console.error('Error fetching donation requests:', error);
     }
   };
+  useEffect(() => {
+    fetchDonationRequests();
+  }, []);
 
   const fetchHelpRequests = async () => {
     try {
@@ -86,13 +104,10 @@ const CharityDashboard = () => {
       console.error('Error fetching help requests:', error);
     }
   };
-
   useEffect(() => {
-    fetchDonationRequests();
     fetchHelpRequests();
   }, []);
 
-  const [posts, setPosts] = useState<ICharityPost[]>();
   const fetchPosts = async () => {
     try {
       const response = await GetCharityPosts(GetUserData()?.userName);
@@ -104,59 +119,247 @@ const CharityDashboard = () => {
       console.error('Error fetching posts:', error);
     }
   };
-
   useEffect(() => {
     fetchPosts();
   }, []);
+  //#endregion
 
-  const [newPost, setNewPost] = useState({
-    content: '',
-    images: null
-  });
 
-  const handleProfileUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Logic to update profile
-    alert('Profile updated successfully!');
-  };
-
-  const handleAddBranch = () => {
-
-  };
-
-  const handleDeleteBranch = (DelBranch: ICharityBranch) => {
-    // Logic to delete branch
-    setBranches(branches.filter(branch => branch !== DelBranch));
-  };
-
-  const handleDonationAction = (id: number, action: 'approve' | 'decline') => {
-    // Logic to approve or decline donation request
-    alert(`Donation request ${id} ${action === 'approve' ? 'approved' : 'declined'} successfully!`);
-  };
-
-  const handleHelpRequestAction = (id: number, action: 'approve' | 'decline') => {
-    // Logic to approve or decline help request
-    alert(`Help request ${id} ${action === 'approve' ? 'approved' : 'declined'} successfully!`);
-  };
-
-  const handleAddPost = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Logic to add a new post
-    if (newPost.content.trim()) {
-      const post = {
-        id: posts.length + 1,
-        content: newPost.content,
-        date: new Date().toISOString().split('T')[0],
-        images: ['https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&q=80&w=500']
-      };
-      setNewPost({ content: '', images: null });
+  const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setProfilePhoto(e.target.files[0]);
     }
   };
 
-  const handleDeletePost = (id: number) => {
-    // Logic to delete post
-    setPosts(posts.filter(post => post.id !== id));
+  const handleWallpaperPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setWallpaperPhoto(e.target.files[0]);
+    }
   };
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('Email', profileData?.email || '');
+    formData.append('Phone', profileData?.phoneNumber || '');
+    formData.append('Adress', profileData?.address || '');
+    formData.append('FullName', profileData?.fullName || '');
+    if (profilePhoto) {
+      formData.append('ProfilePhoto', profilePhoto);
+    }
+    if (wallpaperPhoto) {
+      formData.append('WallpaperPhoto', wallpaperPhoto);
+    }
+    try {
+      const response = await UpdateUserProfile(formData);
+      if (response.status === 200) {
+        alert('Profile updated successfully!');
+        fetchProfileData();
+      } else {
+        alert('Failed to update profile. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('An error occurred while updating the profile.');
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (passwordData?.newPassword !== passwordData?.confirmNewPassword) {
+        alert('New password and confirm password do not match.');
+        return;
+      }
+
+      const response = await UpdateUserPassword({
+        currentPassword: passwordData?.currentPassword,
+        newPassword: passwordData?.confirmNewPassword,
+        confirmNewPassword: passwordData?.confirmNewPassword,
+      });
+
+      if (response.status === 200) {
+        alert('Password changed successfully!');
+        setPasswordData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+      } else {
+        alert('Failed to change password. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      alert('An error occurred while changing the password.');
+    }
+  };
+
+  const handleDeleteBranch = async (DelBranch: ICharityBranch) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete the branch at ${DelBranch.address}?`);
+    if (!confirmDelete) return;
+
+    try {
+      const res = await DeleteBranch(DelBranch.id);
+      if (res.status === 200) {
+        alert("Branch deleted successfully!");
+        fetchBranches();
+      } else {
+        alert("Failed to delete branch. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error deleting branch:", error);
+      alert("An error occurred while deleting the branch.");
+    }
+  };
+
+  const handleDonationAction = async (id: number, action: 'Approved' | 'Cancelled') => {
+    const confirm = window.confirm(`Are you sure you want to ${action === "Approved" ? "approve" : "cancel"} this donation?`);
+    if (!confirm) return;
+    try {
+      const response = await ChangeDonationStatus(id, action);
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch donation requests');
+      }
+      fetchDonationRequests();
+      alert(`Donation ${action === "Approved" ? "approved" : "cancelled"} successfully!`);
+    } catch (error) {
+      console.error(`Error ${action === "Approved" ? "approving" : "cancelling"} donation:`, error);
+      alert(`An error occurred while ${action === "Approved" ? "approving" : "cancelling"} the donation.`);
+    }
+  };
+
+  const handleHelpRequestAction = async (id: number, action: 'Approved' | 'Cancelled') => {
+    const confirm = window.confirm(`Are you sure you want to ${action === "Approved" ? "approve" : "cancel"} this help request?`);
+    if (!confirm) return;
+    try {
+      const response = await ChangeHelpRequestStatus(id, action);
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch help requests');
+      }
+      fetchHelpRequests();
+      alert(`Help request ${action === "Approved" ? "approved" : "cancelled"} successfully!`);
+    } catch (error) {
+      console.error(`Error ${action === "Approved" ? "approving" : "cancelling"} help request:`, error);
+      alert(`An error occurred while ${action === "Approved" ? "approving" : "cancelling"} the help request.`);
+    }
+  };
+
+  const handleBranchDialogOpen = (branch?: ICharityProfileBranches) => {
+    if (branch) {
+      setIsEditingBranch(true);
+      setSelectedBranch(branch);
+    } else {
+      setIsEditingBranch(false);
+      setSelectedBranch({ address: "", phoneNumber: "", description: "", id: 0 });
+    }
+    setBranchDialogOpen(true);
+  };
+
+  const handleBranchDialogClose = () => {
+    setBranchDialogOpen(false);
+    setSelectedBranch({ address: "", phoneNumber: "", description: "", id: 0 });
+  };
+
+  const handleDetailsDialogOpen = (details: ICharityDonation | ICharityHelpRequest, type: "donation" | "helpRequest") => {
+    if (type === 'donation') {
+      setSelectedHelpRequest(null);
+      setSelectedDonation(details as ICharityDonation);
+    } else {
+      setSelectedHelpRequest(details as ICharityHelpRequest);
+      setSelectedDonation(null);
+    }
+    setDetailsDialog(true);
+  };
+
+  const handleDetailsDialogClose = () => {
+    setDetailsDialog(false);
+    setSelectedHelpRequest(null);
+    setSelectedDonation(null);
+  };
+
+  const handleBranchFormSubmit = async () => {
+    const formData = new FormData();
+    formData.append('Address', selectedBranch?.address || '');
+    formData.append('PhoneNumber', selectedBranch?.phoneNumber || '');
+    formData.append('Description', selectedBranch?.description || '');
+    formData.append(`${isEditingBranch ? "NewPhotos" : "Photos"}`, new File([], "placeholder.txt"));
+
+    if (isEditingBranch) {
+      try {
+        const response = await EditBranch(selectedBranch?.id, formData);
+        if (response.status === 200) {
+          alert("Branch updated successfully!");
+          fetchBranches();
+        } else {
+          alert("Failed to update branch. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error updating branch:", error);
+        alert("An error occurred while updating the branch.");
+      }
+    } else {
+      try {
+        const response = await CreateBranch(formData);
+        if (response.status === 200) {
+          alert("Branch created successfully!");
+          fetchBranches();
+        } else {
+          alert("Failed to create branch. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error creating branch:", error);
+        alert("An error occurred while creating the branch.");
+      }
+    }
+    handleBranchDialogClose();
+  };
+
+  const handlePostDialogOpen = (post: ICharityPost) => {
+    setSelectedPost(post);
+    setPostDialog(true);
+  };
+
+  const handlePostDialogClose = () => {
+    setPostDialog(false);
+    setSelectedPost(null);
+  };
+
+  const handleAddPost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const data = new FormData();
+      data.append("Content", selectedPost?.content || "");
+      postImages?.forEach((image) => {
+        data.append("Photos", image);
+      });
+
+      const res = await AddPost(data);
+      if (res.status === 200) {
+        alert("Post added successfully!");
+        fetchPosts();
+        setSelectedPost(null);
+        setPostImages([]);
+      } else {
+        alert("Failed to add post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error adding post:", error);
+      alert("An error occurred while adding the post.");
+    }
+  };
+
+  const handleDeletePost = async (id: number) => {
+    confirm(`Are you sure you want to delete this post?`);
+    if (!confirm) return;
+    try {
+      const res = await DeletePost(id);
+      if (res.status === 200) {
+        alert("Post deleted successfully!");
+        fetchPosts();
+      } else {
+        alert("Failed to delete post. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("An error occurred while deleting the post.");
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -193,14 +396,17 @@ const CharityDashboard = () => {
                   <CardContent className="flex flex-col items-center">
                     <div className="w-48 h-48 rounded-full overflow-hidden mb-6">
                       <img
-                        src={profileData?.profilePhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.wallpaperPhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
+                        src={profilePhoto ? URL.createObjectURL(profilePhoto) : profileData?.profilePhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.profilePhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
                         alt="Charity Logo"
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <Button className="bg-hope-orange hover:bg-hope-dark-orange w-full">
-                      Change Logo
-                    </Button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePhotoChange}
+                      className="text-xs w-full text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-hope-orange file:text-white hover:file:bg-hope-dark-orange"
+                    />
                   </CardContent>
                   <CardHeader>
                     <CardTitle>Charity Wallpaper</CardTitle>
@@ -208,91 +414,136 @@ const CharityDashboard = () => {
                   <CardContent>
                     <div className="w-full h-48 rounded-lg mb-6">
                       <img
-                        src={profileData?.wallpaperPhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.wallpaperPhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
+                        src={wallpaperPhoto ? URL.createObjectURL(wallpaperPhoto) : profileData?.wallpaperPhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.wallpaperPhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
                         alt="Charity Logo"
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <Button className="bg-hope-orange hover:bg-hope-dark-orange w-full">
-                      Change Wallpaper
-                    </Button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleWallpaperPhotoChange}
+                      className="text-xs w-full text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-hope-orange file:text-white hover:file:bg-hope-dark-orange"
+                    />
                   </CardContent>
                 </Card>
 
-                <Card className="md:col-span-2">
-                  <CardHeader>
-                    <CardTitle>Charity Information</CardTitle>
-                    <CardDescription>Update your charity's details</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleProfileUpdate} className="space-y-5">
-                      <div>
-                        <label htmlFor="name" className="block mb-1 text-sm font-medium">Charity Name</label>
-                        <input
-                          id="name"
-                          type="text"
-                          value={profileData?.userName}
-                          onChange={e => setProfileData({ ...profileData, fullName: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        />
-                      </div>
+                <div className='w-full md:col-span-2 space-y-10'>
+                  <Card className="md:col-span-2">
+                    <CardHeader>
+                      <CardTitle>Charity Information</CardTitle>
+                      <CardDescription>Update your charity's details</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleProfileUpdate} className="space-y-5">
+                        <div>
+                          <label htmlFor="name" className="block mb-1 text-sm font-medium">Charity Name</label>
+                          <input
+                            id="name"
+                            type="text"
+                            value={profileData?.fullName}
+                            onChange={e => setProfileData({ ...profileData, fullName: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                          />
+                        </div>
 
-                      <div>
-                        <label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</label>
-                        <input
-                          id="email"
-                          type="email"
-                          value={profileData?.email}
-                          onChange={e => setProfileData({ ...profileData, email: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        />
-                      </div>
+                        <div>
+                          <label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</label>
+                          <input
+                            id="email"
+                            type="email"
+                            value={profileData?.email}
+                            disabled
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                          />
+                        </div>
 
-                      <div>
-                        <label htmlFor="phone" className="block mb-1 text-sm font-medium">Phone Number</label>
-                        <input
-                          id="phone"
-                          type="tel"
-                          value={profileData?.phoneNumber}
-                          onChange={e => setProfileData({ ...profileData, phoneNumber: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        />
-                      </div>
+                        <div>
+                          <label htmlFor="phone" className="block mb-1 text-sm font-medium">Phone Number</label>
+                          <input
+                            id="phone"
+                            type="tel"
+                            value={profileData?.phoneNumber}
+                            onChange={e => setProfileData({ ...profileData, phoneNumber: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                          />
+                        </div>
 
-                      <div>
-                        <label htmlFor="address" className="block mb-1 text-sm font-medium">Main Address</label>
-                        <textarea
-                          id="address"
-                          rows={2}
-                          value={profileData?.address}
-                          onChange={e => setProfileData({ ...profileData, address: e.target.value })}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        ></textarea>
-                      </div>
+                        <div>
+                          <label htmlFor="address" className="block mb-1 text-sm font-medium">Main Address</label>
+                          <textarea
+                            id="address"
+                            rows={2}
+                            value={profileData?.address}
+                            onChange={e => setProfileData({ ...profileData, address: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                          ></textarea>
+                        </div>
 
-                      <div>
-                        <label htmlFor="description" className="block mb-1 text-sm font-medium">Description</label>
-                        <textarea
-                          id="description"
-                          rows={4}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        ></textarea>
-                      </div>
+                        <div>
+                          <label htmlFor="description" className="block mb-1 text-sm font-medium">Description</label>
+                          <textarea
+                            id="description"
+                            rows={4}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                          ></textarea>
+                        </div>
 
-                      <div className='w-full justify-end flex'>
-                        <Button variant='outline' className="hover:bg-hope-orange hover:text-white border-hope-orange bg-white border-2 text-black gap-1">
-                          Change Password
-                        </Button>
-                      </div>
-
-                      <div className='w-full border-t border-gray-300 pt-5 flex justify-center'>
-                        <Button type="submit" className="px-20 bg-hope-orange hover:bg-hope-dark-orange">
-                          Save Changes
-                        </Button>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
+                        <div className='w-full border-t border-gray-300 pt-5 flex justify-center'>
+                          <Button type="submit" className="px-20 bg-hope-orange hover:bg-hope-dark-orange">
+                            Save Changes
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                  {/* Card for Password Information */}
+                  <Card className="md:col-span-2">
+                    <CardHeader>
+                      <CardTitle>Change Password</CardTitle>
+                      <CardDescription>Update your Password</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleChangePassword} className="space-y-5">
+                        <div>
+                          <label htmlFor="oldPassword" className="block mb-1 text-sm font-medium">Old Password</label>
+                          <input
+                            id="oldPassword"
+                            type="password"
+                            value={passwordData?.currentPassword}
+                            onChange={e => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="newPassword" className="block mb-1 text-sm font-medium">New Password</label>
+                          <input
+                            id="newPassword"
+                            type="password"
+                            value={passwordData?.newPassword}
+                            onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="confirmPassword" className="block mb-1 text-sm font-medium">Confirm Password</label>
+                          <input
+                            id="confirmPassword"
+                            type="password"
+                            value={passwordData?.confirmNewPassword}
+                            onChange={e => setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                          />
+                        </div>
+                        <div>
+                          <Button type="submit" className="bg-hope-orange hover:bg-hope-dark-orange" >
+                            Change Password
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </TabsContent>
 
@@ -304,7 +555,7 @@ const CharityDashboard = () => {
                     <CardTitle>Charity Branches</CardTitle>
                     <CardDescription>Manage your charity's locations</CardDescription>
                   </div>
-                  <Button onClick={handleAddBranch} className="bg-hope-orange hover:bg-hope-dark-orange flex items-center gap-1">
+                  <Button onClick={() => handleBranchDialogOpen()} className="bg-hope-orange hover:bg-hope-dark-orange flex items-center gap-1">
                     <Plus className="h-4 w-4" /> Add Branch
                   </Button>
                 </CardHeader>
@@ -316,7 +567,7 @@ const CharityDashboard = () => {
                           <div className="flex justify-between">
                             <CardTitle>{branch?.address}</CardTitle>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="icon" className="h-7 w-7">
+                              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => { handleBranchDialogOpen(branch) }}>
                                 <Edit className="h-3.5 w-3.5" />
                               </Button>
                               <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleDeleteBranch(branch)}>
@@ -328,8 +579,7 @@ const CharityDashboard = () => {
                         <CardContent>
                           <div className="space-y-3">
                             <div className="flex items-start gap-2">
-                              <MapPin className="h-4 w-4 text-hope-orange mt-0.5" />
-                              <span>{branch?.address}</span>
+                              <span>{branch?.description}</span>
                             </div>
                             <div>
                               <strong className="text-sm">Phone:</strong> {branch?.phoneNumber}
@@ -376,7 +626,7 @@ const CharityDashboard = () => {
                           <TableCell>{request.createdAt}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => handleDetailsDialogOpen(request, 'donation')}>
                                 <Eye className="h-4 w-4" />
                               </Button>
                               {request.status === 'Pending' && (
@@ -384,7 +634,7 @@ const CharityDashboard = () => {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleDonationAction(request.id, 'approve')}
+                                    onClick={() => handleDonationAction(request.id, 'Approved')}
                                     className="text-green-500 hover:text-green-700"
                                   >
                                     <Check className="h-4 w-4" />
@@ -392,7 +642,7 @@ const CharityDashboard = () => {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleDonationAction(request.id, 'decline')}
+                                    onClick={() => handleDonationAction(request.id, 'Cancelled')}
                                     className="text-red-500 hover:text-red-700"
                                   >
                                     <X className="h-4 w-4" />
@@ -442,7 +692,7 @@ const CharityDashboard = () => {
                           <TableCell>{request.createdAt}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => handleDetailsDialogOpen(request, 'helpRequest')}>
                                 <Eye className="h-4 w-4" />
                               </Button>
                               {request.status === 'Pending' && (
@@ -450,7 +700,7 @@ const CharityDashboard = () => {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleHelpRequestAction(request.id, 'approve')}
+                                    onClick={() => handleHelpRequestAction(request.id, 'Approved')}
                                     className="text-green-500 hover:text-green-700"
                                   >
                                     <Check className="h-4 w-4" />
@@ -458,7 +708,7 @@ const CharityDashboard = () => {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleHelpRequestAction(request.id, 'decline')}
+                                    onClick={() => handleHelpRequestAction(request.id, 'Cancelled')}
                                     className="text-red-500 hover:text-red-700"
                                   >
                                     <X className="h-4 w-4" />
@@ -485,21 +735,26 @@ const CharityDashboard = () => {
                   <form onSubmit={handleAddPost} className="space-y-4">
                     <Textarea
                       placeholder="What would you like to share with your supporters?"
-                      value={newPost.content}
-                      onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
+                      value={selectedPost?.content || ""}
+                      onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
                       className="min-h-32"
                     />
                     <div className="flex items-center gap-4">
-                      <Button
-                        type="button"
-                        variant="outline"
-                      >
-                        Add Photo
-                      </Button>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (files) {
+                            setPostImages(Array.from(files));
+                          }
+                        }}
+                      />
                       <Button
                         type="submit"
                         className="bg-hope-orange hover:bg-hope-dark-orange"
-                        disabled={!newPost.content.trim()}
+                        disabled={!selectedPost?.content.trim()}
+                        onClick={(e) => handleAddPost(e)}
                       >
                         Publish Post
                       </Button>
@@ -529,7 +784,7 @@ const CharityDashboard = () => {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handlePostDialogOpen(post)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
@@ -545,11 +800,11 @@ const CharityDashboard = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="mb-4">{post.content}</p>
-                      {post.photos.length === 3 ?
+                      {post.photos.length >= 2 ?
                         <div className="slide-container">
-                          <Slide slidesToShow={2}>
+                          <Slide slidesToShow={1} infinite={false} canSwipe={false} autoplay={false}>
                             {post.photos.map((url, index) => (
-                              <div key={index} className='w-full flex justify-center h-full'>
+                              <div key={index} className='w-full flex justify-center h-[20rem]'>
                                 <img draggable={false} src={`https://ma3ansawa.runasp.net${url.imgName}`} alt="" className='object-cover' />
                               </div>
                             ))}
@@ -558,7 +813,7 @@ const CharityDashboard = () => {
                         :
                         <>
                           <img
-                            src={`https://ma3ansawa.runasp.net${post.photos[0].imgName}`}
+                            src={`https://ma3ansawa.runasp.net${post.photos[0]?.imgName}`}
                             alt="Post attachment"
                             className='w-full max-h-[30rem] object-cover'
                           />
@@ -572,7 +827,272 @@ const CharityDashboard = () => {
           </Tabs>
         </div>
       </div>
-    </MainLayout>
+
+      {/* Dialog For Branches */}
+      <Dialog open={branchDialogOpen} onOpenChange={setBranchDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isEditingBranch ? "Edit Branch" : "Add Branch"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="branchAddress" className="block text-sm font-medium">
+                Address
+              </label>
+              <Input
+                id="branchAddress"
+                value={selectedBranch?.address}
+                onChange={(e) =>
+                  setSelectedBranch({ ...selectedBranch, address: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label htmlFor="branchPhone" className="block text-sm font-medium">
+                Phone Number
+              </label>
+              <Input
+                id="branchPhone"
+                value={selectedBranch?.phoneNumber}
+                onChange={(e) =>
+                  setSelectedBranch({ ...selectedBranch, phoneNumber: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label htmlFor="branchPhone" className="block text-sm font-medium">
+                Description
+              </label>
+              <Input
+                id="branchPhone"
+                value={selectedBranch?.description}
+                onChange={(e) =>
+                  setSelectedBranch({ ...selectedBranch, description: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleBranchDialogClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleBranchFormSubmit}>
+              {isEditingBranch ? "Save Changes" : "Add Branch"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog For Donation and help request */}
+      <Dialog open={detailsDialog} onOpenChange={setDetailsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className='text-center text-3xl'>Details</DialogTitle>
+          </DialogHeader>
+          {selectedDonation &&
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Donor Name:
+                </p>
+                <p>
+                  {selectedDonation.userName}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Type:
+                </p>
+                <p>
+                  {selectedDonation.type}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Status:
+                </p>
+                <p>
+                  {selectedDonation.status}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Created At:
+                </p>
+                <p>
+                  {selectedDonation.createdAt}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Description:
+                </p>
+                <p>
+                  {selectedDonation.description}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Amount:
+                </p>
+                <p>
+                  {selectedDonation.amount}
+                </p>
+              </div>
+              {selectedDonation?.photoUrls.length !== 0 &&
+                <div className="space-y-1">
+                  <p className="block text-base font-bold">
+                    Photos:
+                  </p>
+                  {selectedDonation?.photoUrls.map((url, idx) => (
+                    <Link to={`https://ma3ansawa.runasp.net/${url}`} target='_blank' key={idx} className='flex gap-1' >
+                      <FileIcon />
+                      View Photo
+                    </Link>
+                  ))}
+                </div>
+              }
+            </div>
+          }
+          {selectedHelpRequest &&
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Donor Name:
+                </p>
+                <p>
+                  {selectedHelpRequest.userName}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Status:
+                </p>
+                <p>
+                  {selectedHelpRequest.status}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Created At:
+                </p>
+                <p>
+                  {selectedHelpRequest.createdAt}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Description:
+                </p>
+                <p>
+                  {selectedHelpRequest.description}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="block text-base font-bold">
+                  Address:
+                </p>
+                <p>
+                  {selectedHelpRequest.address}
+                </p>
+              </div>
+              {selectedHelpRequest?.photoUrls.length !== 0 &&
+                <div className="space-y-1">
+                  <p className="block text-base font-bold">
+                    Photos:
+                  </p>
+                  {selectedHelpRequest?.photoUrls.map((url, idx) => (
+                    <Link to={`https://ma3ansawa.runasp.net/${url}`} target='_blank' key={idx} className='flex gap-1' >
+                      <FileIcon />
+                      View Photo
+                    </Link>
+                  ))}
+                </div>
+              }
+            </div>
+          }
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDetailsDialogClose}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog for Adding/Editing Post */}
+      <Dialog open={postDialog} onOpenChange={setPostDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Post</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="postContent" className="block text-sm font-medium">
+                Post Content
+              </label>
+              <Textarea
+                id="postContent"
+                value={selectedPost?.content || ""}
+                onChange={(e) =>
+                  setSelectedPost({ ...selectedPost, content: e.target.value })
+                }
+                placeholder="Write something..."
+              />
+            </div>
+            <div>
+              <label htmlFor="postPhotos" className="block text-sm font-medium">
+                Add Photos
+              </label>
+              <Input
+                id="postPhotos"
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files) {
+                    const photos = Array.from(files).map((file) => file);
+                    setPostImages(photos);
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handlePostDialogClose}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                const confirm = window.confirm("Are you sure you want to save changes?");
+                if (!confirm) return;
+                const formData = new FormData();
+                formData.append("Content", selectedPost?.content || "");
+                postImages?.forEach((photo) => {
+                  formData.append("NewPhotos", photo);
+                });
+                formData.append("DeleteOldPhotos", "true");
+                try {
+                  const res = await EditPost(formData, selectedPost?.id);
+                  if (res.status === 200) {
+                    alert("Post updated successfully!");
+                    fetchPosts();
+                  } else {
+                    alert("Failed to update post. Please try again.");
+                  }
+                } catch (error) {
+                  console.error("Error updating post:", error);
+                  alert("An error occurred while updating the post.");
+                }
+                handlePostDialogClose();
+              }}
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </MainLayout >
   );
 };
 

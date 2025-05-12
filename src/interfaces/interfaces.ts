@@ -67,12 +67,14 @@ export interface ICharityPost {
 }
 
 export interface ICharityBranch {
+  id: number;
   phoneNumber: string;
   description: string;
   address: string;
 }
 
 export interface ICharityProfileBranches {
+  id: number;
   phoneNumber: string;
   description: string;
   address: string;

@@ -17,12 +17,45 @@ export function CreateBranch(data: FormData): Promise<AxiosResponse> {
   return axiosInstance
     .post("/Branch/Create", data, {
       headers: {
+        "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${GetUserData()?.token}`
       }
     })
     .then((res) => res)
     .catch((err) => {
       console.error('Error creating branch:', err);
+      throw err;
+    });
+}
+
+export function EditBranch(
+  id: number,
+  data: FormData
+): Promise<AxiosResponse> {
+  return axiosInstance
+    .put(`/Branch/Update/${id}`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${GetUserData()?.token}`
+      }
+    })
+    .then((res) => res)
+    .catch((err) => {
+      console.error('Error editing branch:', err);
+      throw err;
+    });
+}
+
+export function DeleteBranch(id: number): Promise<AxiosResponse> {
+  return axiosInstance
+    .delete(`/Branch/Delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${GetUserData()?.token}`
+      }
+    })
+    .then((res) => res)
+    .catch((err) => {
+      console.error('Error deleting branch:', err);
       throw err;
     });
 }

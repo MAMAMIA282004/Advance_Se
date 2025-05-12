@@ -53,3 +53,33 @@ export function DeletePost(id: number) {
       throw error;
     });
 }
+
+export function EditPost(data: FormData, id: number) {
+  return axiosInstance
+    .put(`/Post/update-post/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${GetUserData()?.token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((response) => response)
+    .catch((error) => {
+      console.error('Error editing post:', error);
+      throw error;
+    });
+}
+
+export function AddPost(data: FormData) {
+  return axiosInstance
+    .post(`/Post/Create`, data, {
+      headers: {
+        Authorization: `Bearer ${GetUserData()?.token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((response) => response)
+    .catch((error) => {
+      console.error('Error adding post:', error);
+      throw error;
+    });
+}
