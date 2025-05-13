@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +25,10 @@ import { AddPost, DeletePost, EditPost, GetCharityPosts } from '@/Api/posts/post
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { branchSchema } from '@/lib/validations';
+import { toast } from 'sonner';
 
 const CharityDashboard = () => {
 
@@ -46,6 +49,10 @@ const CharityDashboard = () => {
   const [selectedPost, setSelectedPost] = useState<ICharityPost>();
   const [postDialog, setPostDialog] = useState(false);
   const [postImages, setPostImages] = useState<File[]>();
+
+  const { register: registerBranch, handleSubmit: handleBranchSubmit, formState: { errors: branchErrors }, reset: resetBranch } = useForm({
+    resolver: yupResolver(branchSchema)
+  });
 
   //#region fetching data
   const fetchProfileData = async () => {
@@ -273,41 +280,33 @@ const CharityDashboard = () => {
     setSelectedDonation(null);
   };
 
-  const handleBranchFormSubmit = async () => {
+  const handleBranchFormSubmit = async (data: any) => {
     const formData = new FormData();
-    formData.append('Address', selectedBranch?.address || '');
-    formData.append('PhoneNumber', selectedBranch?.phoneNumber || '');
-    formData.append('Description', selectedBranch?.description || '');
+    formData.append('Address', data.address);
+    formData.append('PhoneNumber', data.phoneNumber);
+    formData.append('Description', data.description);
     formData.append(`${isEditingBranch ? "NewPhotos" : "Photos"}`, new File([], "placeholder.txt"));
 
-    if (isEditingBranch) {
-      try {
+    try {
+      if (isEditingBranch) {
         const response = await EditBranch(selectedBranch?.id, formData);
         if (response.status === 200) {
-          alert("Branch updated successfully!");
+          toast.success("Branch updated successfully!");
           fetchBranches();
-        } else {
-          alert("Failed to update branch. Please try again.");
+          handleBranchDialogClose();
         }
-      } catch (error) {
-        console.error("Error updating branch:", error);
-        alert("An error occurred while updating the branch.");
-      }
-    } else {
-      try {
+      } else {
         const response = await CreateBranch(formData);
         if (response.status === 200) {
-          alert("Branch created successfully!");
+          toast.success("Branch created successfully!");
           fetchBranches();
-        } else {
-          alert("Failed to create branch. Please try again.");
+          handleBranchDialogClose();
         }
-      } catch (error) {
-        console.error("Error creating branch:", error);
-        alert("An error occurred while creating the branch.");
       }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'An error occurred while processing your request.';
+      toast.error(errorMessage);
     }
-    handleBranchDialogClose();
   };
 
   const handlePostDialogOpen = (post: ICharityPost) => {
@@ -834,18 +833,19 @@ const CharityDashboard = () => {
           <DialogHeader>
             <DialogTitle>{isEditingBranch ? "Edit Branch" : "Add Branch"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleBranchSubmit(handleBranchFormSubmit)} className="space-y-4">
             <div>
               <label htmlFor="branchAddress" className="block text-sm font-medium">
                 Address
               </label>
               <Input
                 id="branchAddress"
-                value={selectedBranch?.address}
-                onChange={(e) =>
-                  setSelectedBranch({ ...selectedBranch, address: e.target.value })
-                }
+                {...registerBranch('address')}
+                className={branchErrors.address ? 'border-red-500' : ''}
               />
+              {branchErrors.address && (
+                <p className="text-red-500 text-sm mt-1">{branchErrors.address.message}</p>
+              )}
             </div>
             <div>
               <label htmlFor="branchPhone" className="block text-sm font-medium">
@@ -853,33 +853,35 @@ const CharityDashboard = () => {
               </label>
               <Input
                 id="branchPhone"
-                value={selectedBranch?.phoneNumber}
-                onChange={(e) =>
-                  setSelectedBranch({ ...selectedBranch, phoneNumber: e.target.value })
-                }
+                {...registerBranch('phoneNumber')}
+                className={branchErrors.phoneNumber ? 'border-red-500' : ''}
               />
+              {branchErrors.phoneNumber && (
+                <p className="text-red-500 text-sm mt-1">{branchErrors.phoneNumber.message}</p>
+              )}
             </div>
             <div>
-              <label htmlFor="branchPhone" className="block text-sm font-medium">
+              <label htmlFor="branchDescription" className="block text-sm font-medium">
                 Description
               </label>
               <Input
-                id="branchPhone"
-                value={selectedBranch?.description}
-                onChange={(e) =>
-                  setSelectedBranch({ ...selectedBranch, description: e.target.value })
-                }
+                id="branchDescription"
+                {...registerBranch('description')}
+                className={branchErrors.description ? 'border-red-500' : ''}
               />
+              {branchErrors.description && (
+                <p className="text-red-500 text-sm mt-1">{branchErrors.description.message}</p>
+              )}
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleBranchDialogClose}>
-              Cancel
-            </Button>
-            <Button onClick={handleBranchFormSubmit}>
-              {isEditingBranch ? "Save Changes" : "Add Branch"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={handleBranchDialogClose}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                {isEditingBranch ? "Save Changes" : "Add Branch"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

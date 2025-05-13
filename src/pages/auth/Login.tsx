@@ -7,17 +7,38 @@ import Icon from '../../components/ui/icon';
 import { LoginCall } from '@/Api/Auth/authinicatiton';
 import { IUserData } from '@/interfaces/interfaces';
 import Cookies from 'js-cookie';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { loginSchema } from '@/lib/validations';
+import { toast } from 'sonner';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(loginSchema)
+  });
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    const userData: IUserData = await LoginCall(email, password);
-    Cookies.set('UserData', JSON.stringify(userData), { path: '/', expires: Date.parse(userData.expireAt), secure: true, sameSite: 'Strict' });
-    window.location.href = '/';
+  const onSubmit = async (data: { email: string; password: string }) => {
+    setIsSubmitting(true);
+    try {
+      const userData: IUserData = await LoginCall(data.email, data.password);
+      Cookies.set('UserData', JSON.stringify(userData), { 
+        path: '/', 
+        expires: Date.parse(userData.expireAt), 
+        secure: true, 
+        sameSite: 'Strict' 
+      });
+      toast.success('Login successful!');
+      navigate('/');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -41,28 +62,27 @@ const Login = () => {
               <p className="text-gray-600">Please fill your detail to access your account</p>
             </div>
 
-            <form className="space-y-5" onSubmit={handleLogin}>
+            <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
               <div>
                 <input
+                  {...register('email')}
                   type="email"
                   placeholder="Email"
                   autoComplete='email'
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                  className={`w-full px-4 py-3 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-hope-orange/50`}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                )}
               </div>
 
               <div className="relative">
                 <input
+                  {...register('password')}
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
                   autoComplete='current-password'
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                  className={`w-full px-4 py-3 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-hope-orange/50`}
                 />
                 <button
                   type="button"
@@ -71,13 +91,17 @@ const Login = () => {
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                )}
               </div>
 
               <Button
                 type="submit"
                 className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white py-3 font-medium"
+                disabled={isSubmitting}
               >
-                Sign In
+                {isSubmitting ? 'Signing in...' : 'Sign In'}
               </Button>
 
               <div className="flex items-center justify-center my-4">
