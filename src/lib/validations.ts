@@ -17,10 +17,11 @@ export const registerSchema = yup
       .email("Invalid email"),
     password: yup
       .string()
-      .required()
-      .min(6)
-      .matches(/[^a-zA-Z0-9]/)
-      .matches(/[a-z]/)
+      .required("Password is required")
+      .min(6, "Password must be at least 6 characters long")
+      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[^a-zA-Z0-9]/, "Password must contain at least one special character")
       .test(
         "three-different-characters",
         "Password must use at least 3 different characters.",
@@ -55,4 +56,22 @@ export const branchSchema = yup.object({
   description: yup
     .string()
     .required("Description is required")
+});
+export const passwordChangeSchema = yup.object({
+  currentPassword: yup.string().required('Current password is required'),
+  newPassword: yup
+    .string()
+    .required('New password is required')
+    .min(6, 'Password must be at least 6 characters')
+    .matches(/[^a-zA-Z0-9]/, 'Password must contain at least one special character')
+    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .test(
+      'three-different-characters',
+      'Password must use at least 3 different characters',
+      value => new Set(value).size >= 3
+    ),
+  confirmNewPassword: yup
+    .string()
+    .required('Please confirm your new password')
+    .oneOf([yup.ref('newPassword')], 'Passwords must match'),
 });

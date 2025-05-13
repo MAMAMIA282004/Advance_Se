@@ -24,26 +24,7 @@ import { toast } from 'sonner';
 import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-
-// Validation schema for password change
-const passwordChangeSchema = yup.object({
-  currentPassword: yup.string().required('Current password is required'),
-  newPassword: yup
-    .string()
-    .required('New password is required')
-    .min(6, 'Password must be at least 6 characters')
-    .matches(/[^a-zA-Z0-9]/, 'Password must contain at least one special character')
-    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .test(
-      'three-different-characters',
-      'Password must use at least 3 different characters',
-      value => new Set(value).size >= 3
-    ),
-  confirmNewPassword: yup
-    .string()
-    .required('Please confirm your new password')
-    .oneOf([yup.ref('newPassword')], 'Passwords must match'),
-});
+import { passwordChangeSchema } from '@/lib/validations';
 
 const UserDashboard = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -152,12 +133,12 @@ const UserDashboard = () => {
         else
           fetchHelpRequests();
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to cancel the request. Please try again.');
     }
   };
 
-  const onSubmitPasswordChange = async (data: any) => {
+  const onSubmitPasswordChange = async (data) => {
     try {
       const response = await UpdateUserPassword({
         currentPassword: data.currentPassword,
@@ -169,7 +150,7 @@ const UserDashboard = () => {
         toast.success('Password changed successfully!');
         resetPassword();
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to change password. Please try again.');
     }
   };

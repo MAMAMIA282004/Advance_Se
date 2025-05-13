@@ -10,14 +10,14 @@ interface LoginResponse {
   };
 }
 
-export const LoginCall = async (email: string, password: string): Promise<IUserData> => {
+export const LoginCall = async (email: string, password: string) => {
   try {
     const response = await axiosInstance.post('/Auth/login', {
       email,
       password,
     });
 
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error('Login failed:', error);
     throw error;

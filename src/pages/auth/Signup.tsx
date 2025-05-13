@@ -50,11 +50,10 @@ const Signup = () => {
           navigate('/login');
         }
       }
-    } catch (error: any) {
-      // Handle backend errors
-      const errorMessage = error.response?.data?.data?.message || 
-                          error.response?.data?.message || 
-                          'Registration failed. Please try again.';
+    } catch (error) {
+      const errorMessage = error.response?.data?.data?.message ||
+        error.response?.data?.message ||
+        'Registration failed. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -114,6 +113,9 @@ const Signup = () => {
                   placeholder="Full Name"
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                 />
+                {errors.fullName && (
+                  <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>
+                )}
               </div>
 
               <div>
@@ -123,6 +125,9 @@ const Signup = () => {
                   placeholder="Email"
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                )}
               </div>
 
               <div className="relative">
@@ -139,6 +144,9 @@ const Signup = () => {
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                )}
               </div>
 
               <div className="relative">
@@ -155,6 +163,9 @@ const Signup = () => {
                 >
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
+                {errors.reEnterPassword && (
+                  <p className="text-red-500 text-sm mt-1">{errors.reEnterPassword.message}</p>
+                )}
               </div>
 
               <div>
@@ -164,6 +175,9 @@ const Signup = () => {
                   placeholder="Address"
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                 />
+                {errors.address && (
+                  <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+                )}
               </div>
 
               <div>
@@ -173,6 +187,9 @@ const Signup = () => {
                   placeholder="Phone Number"
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
                 />
+                {errors.PhoneNumber && (
+                  <p className="text-red-500 text-sm mt-1">{errors.PhoneNumber.message}</p>
+                )}
               </div>
 
               {userType === 'charity' && (
@@ -188,6 +205,7 @@ const Signup = () => {
                         type="file"
                         accept=".pdf"
                         multiple={false}
+                        required={userType === 'charity'}
                         className="block w-full text-sm text-gray-500 mt-3
                           file:mr-4 file:py-2 file:px-4
                           file:rounded-full file:border-0
@@ -203,25 +221,11 @@ const Signup = () => {
                 </div>
               )}
 
-              {/* Display validation errors */}
-              {errors.fullName && (
-                <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>
-              )}
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-              )}
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-              )}
-              {errors.reEnterPassword && (
-                <p className="text-red-500 text-sm mt-1">{errors.reEnterPassword.message}</p>
-              )}
-              {errors.PhoneNumber && (
-                <p className="text-red-500 text-sm mt-1">{errors.PhoneNumber.message}</p>
-              )}
-              {errors.address && (
-                <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
-              )}
+
+
+
+
+
 
               <Button
                 type="submit"

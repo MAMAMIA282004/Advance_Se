@@ -9,14 +9,14 @@ import { IUserData } from '@/interfaces/interfaces';
 import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { loginSchema } from '@/lib/validations';
+import { loginSchema } from '@/lib/validations'
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
-  
+
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(loginSchema)
   });
@@ -24,16 +24,22 @@ const Login = () => {
   const onSubmit = async (data: { email: string; password: string }) => {
     setIsSubmitting(true);
     try {
-      const userData: IUserData = await LoginCall(data.email, data.password);
-      Cookies.set('UserData', JSON.stringify(userData), { 
-        path: '/', 
-        expires: Date.parse(userData.expireAt), 
-        secure: true, 
-        sameSite: 'Strict' 
+      const response: { statusCode: number, message: string, data: IUserData } = await LoginCall(data.email, data.password);
+      if (response?.statusCode === 200 && response?.data === null) {
+        toast.error(response?.message);
+        setIsSubmitting(false);
+        return;
+      }
+      const userData = response.data;
+      Cookies.set('UserData', JSON.stringify(userData), {
+        path: '/',
+        expires: Date.parse(userData.expireAt),
+        secure: true,
+        sameSite: 'Strict'
       });
       toast.success('Login successful!');
-      navigate('/');
-    } catch (error: any) {
+      window.location.href = "/";
+    } catch (error) {
       const errorMessage = error.response?.data?.message || 'Login failed. Please check your credentials.';
       toast.error(errorMessage);
     } finally {

@@ -632,7 +632,7 @@ const AdminDashboard = () => {
 
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
+            <Button variant="outline" onClick={handleOpenDialog}>
               Close
             </Button>
           </DialogFooter>

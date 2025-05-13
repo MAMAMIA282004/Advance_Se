@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { branchSchema } from '@/lib/validations';
+import { branchSchema, passwordChangeSchema } from '@/lib/validations';
 import { toast } from 'sonner';
 
 const CharityDashboard = () => {
@@ -42,7 +42,6 @@ const CharityDashboard = () => {
   const [selectedBranch, setSelectedBranch] = useState<ICharityProfileBranches | null>(null);
   const [selectedDonation, setSelectedDonation] = useState<ICharityDonation>();
   const [selectedHelpRequest, setSelectedHelpRequest] = useState<ICharityHelpRequest>();
-  const [passwordData, setPasswordData] = useState<IChangePasswordForm>();
   const [branchDialogOpen, setBranchDialogOpen] = useState(false);
   const [detailsDialog, setDetailsDialog] = useState(false);
   const [isEditingBranch, setIsEditingBranch] = useState(false);
@@ -51,7 +50,12 @@ const CharityDashboard = () => {
   const [postImages, setPostImages] = useState<File[]>();
 
   const { register: registerBranch, handleSubmit: handleBranchSubmit, formState: { errors: branchErrors }, reset: resetBranch } = useForm({
-    resolver: yupResolver(branchSchema)
+    resolver: yupResolver(branchSchema),
+    values: selectedBranch ? { address: selectedBranch.address, description: selectedBranch.description, phoneNumber: selectedBranch.phoneNumber } : null
+  });
+
+  const { register: registerPassword, handleSubmit: handlePasswordSubmit, formState: { errors: passwordErrors }, reset: resetPassword } = useForm({
+    resolver: yupResolver(passwordChangeSchema)
   });
 
   //#region fetching data
@@ -131,6 +135,22 @@ const CharityDashboard = () => {
   }, []);
   //#endregion
 
+  const onSubmitPasswordChange = async (data) => {
+    try {
+      const response = await UpdateUserPassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+        confirmNewPassword: data.confirmNewPassword,
+      });
+
+      if (response.status === 200) {
+        toast.success('Password changed successfully!');
+        resetPassword();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to change password. Please try again.');
+    }
+  };
 
   const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -168,32 +188,6 @@ const CharityDashboard = () => {
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('An error occurred while updating the profile.');
-    }
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (passwordData?.newPassword !== passwordData?.confirmNewPassword) {
-        alert('New password and confirm password do not match.');
-        return;
-      }
-
-      const response = await UpdateUserPassword({
-        currentPassword: passwordData?.currentPassword,
-        newPassword: passwordData?.confirmNewPassword,
-        confirmNewPassword: passwordData?.confirmNewPassword,
-      });
-
-      if (response.status === 200) {
-        alert('Password changed successfully!');
-        setPasswordData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
-      } else {
-        alert('Failed to change password. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error changing password:', error);
-      alert('An error occurred while changing the password.');
     }
   };
 
@@ -280,7 +274,7 @@ const CharityDashboard = () => {
     setSelectedDonation(null);
   };
 
-  const handleBranchFormSubmit = async (data: any) => {
+  const handleBranchFormSubmit = async (data) => {
     const formData = new FormData();
     formData.append('Address', data.address);
     formData.append('PhoneNumber', data.phoneNumber);
@@ -303,7 +297,7 @@ const CharityDashboard = () => {
           handleBranchDialogClose();
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       const errorMessage = error.response?.data?.message || 'An error occurred while processing your request.';
       toast.error(errorMessage);
     }
@@ -344,8 +338,8 @@ const CharityDashboard = () => {
   };
 
   const handleDeletePost = async (id: number) => {
-    confirm(`Are you sure you want to delete this post?`);
-    if (!confirm) return;
+    const conf = confirm(`Are you sure you want to delete this post?`);
+    if (!conf) return;
     try {
       const res = await DeletePost(id);
       if (res.status === 200) {
@@ -503,42 +497,46 @@ const CharityDashboard = () => {
                       <CardDescription>Update your Password</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <form onSubmit={handleChangePassword} className="space-y-5">
+                      <form onSubmit={handlePasswordSubmit(onSubmitPasswordChange)} className="space-y-4">
                         <div>
-                          <label htmlFor="oldPassword" className="block mb-1 text-sm font-medium">Old Password</label>
+                          <label className="block mb-1 text-sm font-medium">Current Password</label>
                           <input
-                            id="oldPassword"
                             type="password"
-                            value={passwordData?.currentPassword}
-                            onChange={e => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            {...registerPassword('currentPassword')}
+                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'}`}
                           />
+                          {passwordErrors.currentPassword && (
+                            <p className="text-red-500 text-sm mt-1">{passwordErrors.currentPassword.message}</p>
+                          )}
                         </div>
+
                         <div>
-                          <label htmlFor="newPassword" className="block mb-1 text-sm font-medium">New Password</label>
+                          <label className="block mb-1 text-sm font-medium">New Password</label>
                           <input
-                            id="newPassword"
                             type="password"
-                            value={passwordData?.newPassword}
-                            onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            {...registerPassword('newPassword')}
+                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'}`}
                           />
+                          {passwordErrors.newPassword && (
+                            <p className="text-red-500 text-sm mt-1">{passwordErrors.newPassword.message}</p>
+                          )}
                         </div>
+
                         <div>
-                          <label htmlFor="confirmPassword" className="block mb-1 text-sm font-medium">Confirm Password</label>
+                          <label className="block mb-1 text-sm font-medium">Confirm New Password</label>
                           <input
-                            id="confirmPassword"
                             type="password"
-                            value={passwordData?.confirmNewPassword}
-                            onChange={e => setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            {...registerPassword('confirmNewPassword')}
+                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.confirmNewPassword ? 'border-red-500' : 'border-gray-300'}`}
                           />
+                          {passwordErrors.confirmNewPassword && (
+                            <p className="text-red-500 text-sm mt-1">{passwordErrors.confirmNewPassword.message}</p>
+                          )}
                         </div>
-                        <div>
-                          <Button type="submit" className="bg-hope-orange hover:bg-hope-dark-orange" >
-                            Change Password
-                          </Button>
-                        </div>
+
+                        <Button type="submit" className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white">
+                          Change Password
+                        </Button>
                       </form>
                     </CardContent>
                   </Card>
@@ -1034,6 +1032,7 @@ const CharityDashboard = () => {
               </label>
               <Textarea
                 id="postContent"
+                required
                 value={selectedPost?.content || ""}
                 onChange={(e) =>
                   setSelectedPost({ ...selectedPost, content: e.target.value })
@@ -1065,6 +1064,7 @@ const CharityDashboard = () => {
               Cancel
             </Button>
             <Button
+              disabled={selectedPost?.content.length === 0}
               onClick={async () => {
                 const confirm = window.confirm("Are you sure you want to save changes?");
                 if (!confirm) return;
@@ -1073,7 +1073,7 @@ const CharityDashboard = () => {
                 postImages?.forEach((photo) => {
                   formData.append("NewPhotos", photo);
                 });
-                formData.append("DeleteOldPhotos", "true");
+                formData.append("DeleteOldPhotos", postImages.length !== 0 ? "true" : "false");
                 try {
                   const res = await EditPost(formData, selectedPost?.id);
                   if (res.status === 200) {
