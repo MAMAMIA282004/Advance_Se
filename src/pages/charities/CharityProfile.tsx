@@ -14,10 +14,36 @@ import { DonateWithItem, DonateWithMoney } from '@/Api/donations/donations';
 import { RequestHelp } from '@/Api/helpRequest/helpRequests';
 import { GetUserData } from '@/lib/utils';
 import { CreateReport } from '@/Api/reports/reports';
+import { toast } from 'sonner';
+import * as yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+// Validation schemas
+const donationSchema = yup.object({
+  name: yup.string().required('Name is required'),
+  email: yup.string().email('Invalid email').required('Email is required'),
+  phone: yup.string().required('Phone number is required').matches(/^\d+$/, 'Phone number must contain numbers only'),
+  address: yup.string().required('Address is required'),
+  itemDescription: yup.string().required('Item description is required'),
+});
+
+const helpRequestSchema = yup.object({
+  phone: yup.string().required('Phone number is required').matches(/^\d+$/, 'Phone number must contain numbers only'),
+  address: yup.string().required('Address is required'),
+  description: yup.string().required('Description is required'),
+});
+
+const commentSchema = yup.object({
+  content: yup.string().required('Comment cannot be empty').min(1, 'Comment cannot be empty'),
+});
 
 const CharityProfile = () => {
   const userName = useLocation().pathname.split('/')[2];
   const userData = GetUserData();
+  const isUser = userData?.roles[0] === 'user';
+  const isAdmin = userData?.roles.includes('admin');
+  const isCharity = userData?.roles[0] === 'charity';
   const [charity, setCharity] = useState<ICharityProfile | null>({
     charityName: "",
     address: "",
@@ -31,6 +57,18 @@ const CharityProfile = () => {
   const [charityPosts, setCharityPosts] = useState<ICharityPost[] | null>(null);
   const [charityBranches, setCharityBranches] = useState<ICharityBranch[] | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState<Record<number, boolean>>({});
+
+  const { register: registerDonation, handleSubmit: handleDonationSubmit, formState: { errors: donationErrors }, reset: resetDonation } = useForm({
+    resolver: yupResolver(donationSchema)
+  });
+  
+  const { register: registerHelp, handleSubmit: handleHelpSubmit, formState: { errors: helpErrors }, reset: resetHelp } = useForm({
+    resolver: yupResolver(helpRequestSchema)
+  });
+  
+  const { register: registerComment, handleSubmit: handleCommentSubmit, formState: { errors: commentErrors }, reset: resetComment } = useForm({
+    resolver: yupResolver(commentSchema)
+  });
 
   const handleEditComment = async (commentId: number) => {
     const newContent = prompt("Edit your comment:");
@@ -46,8 +84,6 @@ const CharityProfile = () => {
         console.error("Error updating comment:", error);
         alert("An error occurred while updating your comment. Please try again later.");
       }
-    } else {
-      alert("Comment cannot be empty.");
     }
   };
 
@@ -110,97 +146,111 @@ const CharityProfile = () => {
     image: []
   });
 
-  const handleNewComment = async (postId: number) => {
-    if (newComment.trim() && userData?.roles[0] === "user") {
-      try {
-        const formData = new FormData();
-        formData.append('PostId', postId.toString());
-        formData.append('Content', newComment);
-        const response = await CreateComment(formData);
-        if (response.status === 200) {
-          alert('Comment added successfully!');
-          setNewComment('');
-          setIsCommenting({ ...isCommenting, [postId]: false });
-        } else {
-          alert('Failed to add comment. Please try again.');
-        }
-      } catch (error) {
-        console.error('Error adding comment:', error);
-        alert('An error occurred while adding your comment. Please try again later.');
+  const handleNewComment = async (postId: number, data: { content: string }) => {
+    if (!isUser) {
+      toast.error('Only regular users can comment on posts');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('PostId', postId.toString());
+      formData.append('Content', data.content);
+      const response = await CreateComment(formData);
+      if (response.status === 200) {
+        toast.success('Comment added successfully!');
+        resetComment();
+        setIsCommenting({ ...isCommenting, [postId]: false });
       }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to add comment. Please try again.');
     }
   };
 
-  const handleDonationSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('charityUserName', charity.userName);
-    formData.append('description', donationForm.itemDescription);
-    formData.append('address', donationForm.address);
-    formData.append('phone', donationForm.phone);
-    donationForm.image.forEach((image: File) => {
-      formData.append('photos', image);
-    })
+  const onSubmitDonation = async (data: any) => {
+    if (!isUser) {
+      toast.error('Only regular users can make donations');
+      return;
+    }
+
     try {
+      const formData = new FormData();
+      formData.append('charityUserName', charity.userName);
+      formData.append('description', data.itemDescription);
+      formData.append('address', data.address);
+      formData.append('phone', data.phone);
+      donationForm.image.forEach((image: File) => {
+        formData.append('photos', image);
+      });
+      
       const res = await DonateWithItem(formData);
       if (res.status === 200) {
-        alert('Donation request submitted successfully!');
+        toast.success('Donation request submitted successfully!');
+        resetDonation();
         setDonationForm({
           name: '',
           email: '',
           phone: '',
           address: '',
           itemDescription: '',
-          image: null
+          image: []
         });
-      } else {
-        alert('Failed to submit donation request. Please try again.');
       }
-    } catch (error) {
-      console.error('Error submitting donation request:', error);
-      alert('An error occurred while submitting your donation request. Please try again later.');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to submit donation request. Please try again.');
     }
   };
 
-  const handleHelpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('charityUserName', charity.userName);
-    formData.append('description', helpForm.description);
-    formData.append('address', helpForm.address);
-    formData.append('phone', helpForm.phone);
-    helpForm.image.forEach((image: File) => {
-      formData.append('photos', image);
-    })
+  const onSubmitHelp = async (data: any) => {
+    if (!isUser) {
+      toast.error('Only regular users can submit help requests');
+      return;
+    }
+
     try {
+      const formData = new FormData();
+      formData.append('charityUserName', charity.userName);
+      formData.append('description', data.description);
+      formData.append('address', data.address);
+      formData.append('phone', data.phone);
+      helpForm.image.forEach((image: File) => {
+        formData.append('photos', image);
+      });
+      
       const res = await RequestHelp(formData);
       if (res.status === 200) {
-        alert('Help request submitted successfully!');
+        toast.success('Help request submitted successfully!');
+        resetHelp();
         setHelpForm({
           phone: '',
-          description: "",
+          description: '',
           address: '',
-          image: null
+          image: []
         });
-      } else {
-        alert('Failed to request help. Please try again.');
       }
-    } catch (error) {
-      console.error('Error submitting help request:', error);
-      alert('An error occurred while submitting your help request. Please try again later.');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to submit help request. Please try again.');
     }
   };
 
   const handleMoneyDonation = async () => {
-    if (donationAmount) {
+    if (!isUser) {
+      toast.error('Only regular users can make monetary donations');
+      return;
+    }
+
+    if (!donationAmount) {
+      toast.error('Please enter a donation amount');
+      return;
+    }
+
+    try {
       const res = await DonateWithMoney(charity.userName, donationAmount);
       if (res && res.url) {
         window.location.href = res.url;
-      } else {
-        alert('Failed to initiate payment. Please try again.');
       }
-    } else {
-      alert('Please enter a donation amount');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to initiate payment. Please try again.');
     }
   };
 
@@ -272,12 +322,16 @@ const CharityProfile = () => {
                 <TabsTrigger value="home" className="rounded-none border-b-2 border-transparent data-[state=active]:border-hope-orange data-[state=active]:bg-transparent">
                   Home
                 </TabsTrigger>
-                <TabsTrigger value="donate" className="rounded-none border-b-2 border-transparent data-[state=active]:border-hope-orange data-[state=active]:bg-transparent">
-                  Donate
-                </TabsTrigger>
-                <TabsTrigger value="help" className="rounded-none border-b-2 border-transparent data-[state=active]:border-hope-orange data-[state=active]:bg-transparent">
-                  Request Help
-                </TabsTrigger>
+                {isUser && (
+                  <>
+                    <TabsTrigger value="donate" className="rounded-none border-b-2 border-transparent data-[state=active]:border-hope-orange data-[state=active]:bg-transparent">
+                      Donate
+                    </TabsTrigger>
+                    <TabsTrigger value="help" className="rounded-none border-b-2 border-transparent data-[state=active]:border-hope-orange data-[state=active]:bg-transparent">
+                      Request Help
+                    </TabsTrigger>
+                  </>
+                )}
                 <TabsTrigger value="contact" className="rounded-none border-b-2 border-transparent data-[state=active]:border-hope-orange data-[state=active]:bg-transparent">
                   Contact
                 </TabsTrigger>
@@ -493,36 +547,28 @@ const CharityProfile = () => {
                                 </div>
                               ))}
 
-                              {isCommenting[post.id] && (
-                                <div className="flex mt-4">
-                                  <div className="w-8 h-8 rounded-full bg-gray-300 mr-3 flex-shrink-0"></div>
-                                  <div className="flex-grow">
-                                    <Textarea
-                                      placeholder="Write a comment..."
-                                      value={newComment}
-                                      onChange={(e) => setNewComment(e.target.value)}
-                                      className="min-h-[80px]"
-                                    />
-                                    <div className="flex justify-end mt-2 space-x-2">
-                                      <Button
-                                        variant="outline"
-                                        onClick={() => setIsCommenting({ ...isCommenting, [post.id]: false })}
-                                      >
-                                        Cancel
-                                      </Button>
-                                      <Button
-                                        className="bg-hope-orange hover:bg-hope-dark-orange"
-                                        onClick={() => handleNewComment(post.id)}
-                                        disabled={!newComment.trim()}
-                                      >
-                                        Post Comment
-                                      </Button>
-                                    </div>
+                              {isCommenting[post.id] && isUser && (
+                                <form onSubmit={handleCommentSubmit((data) => handleNewComment(post.id, data))} className="mt-4">
+                                  <Textarea
+                                    {...registerComment('content')}
+                                    placeholder="Write your comment..."
+                                    className={`w-full ${commentErrors.content ? 'border-red-500' : ''}`}
+                                  />
+                                  {commentErrors.content && (
+                                    <p className="text-red-500 text-sm mt-1">{commentErrors.content.message}</p>
+                                  )}
+                                  <div className="flex gap-2 mt-2">
+                                    <Button type="submit" className="bg-hope-orange hover:bg-hope-dark-orange text-white">
+                                      Submit
+                                    </Button>
+                                    <Button type="button" variant="outline" onClick={() => toggleComment(post.id)}>
+                                      Cancel
+                                    </Button>
                                   </div>
-                                </div>
+                                </form>
                               )}
 
-                              {!isCommenting[post.id] && (
+                              {!isCommenting[post.id] && isUser && (
                                 <Button
                                   variant="ghost"
                                   className="text-hope-orange mt-2"
@@ -530,6 +576,12 @@ const CharityProfile = () => {
                                 >
                                   Add Comment
                                 </Button>
+                              )}
+
+                              {!isUser && (
+                                <p className="text-center text-gray-500 mt-2">
+                                  Only regular users can comment on posts
+                                </p>
                               )}
                             </div>
                           )}
@@ -540,239 +592,243 @@ const CharityProfile = () => {
               </div>
             </TabsContent>
 
-            {/* Donate Tab Content */}
-            <TabsContent value="donate">
-              <div className="grid md:grid-cols-2 gap-8 mt-8">
-                {/* Money Donation */}
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="p-6">
-                    <div className="flex items-center mb-6">
-                      <div className="bg-hope-orange/10 p-3 rounded-full mr-4">
-                        <DollarSign className="h-6 w-6 text-hope-orange" />
-                      </div>
-                      <h2 className="text-xl font-semibold">
-
-                      </h2>
-                    </div>
-
-                    <p className="text-gray-600 mb-6">
-                      Your financial contribution helps us continue our mission and make a difference in our community.
-                    </p>
-
-                    <div className="mb-6">
-                      <label className="block mb-2 font-medium">Enter donation amount ($)</label>
-                      <input
-                        type="number"
-                        min="1"
-                        placeholder="0.00"
-                        value={donationAmount}
-                        onChange={(e) => setDonationAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3 mb-6">
-                      {[10, 25, 50, 100, 250, 500].map((amount) => (
-                        <Button
-                          key={amount}
-                          variant="outline"
-                          onClick={() => setDonationAmount(amount)}
-                          className={donationAmount === amount ? 'border-hope-orange text-hope-orange' : ''}
-                        >
-                          ${amount}
-                        </Button>
-                      ))}
-                    </div>
-
-                    <Button
-                      className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white"
-                      onClick={handleMoneyDonation}
-                      disabled={!donationAmount}
-                    >
-                      Continue to Payment
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Items Donation */}
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="p-6">
-                    <div className="flex items-center mb-6">
-                      <div className="bg-hope-orange/10 p-3 rounded-full mr-4">
-                        <Heart className="h-6 w-6 text-hope-orange" />
-                      </div>
-                      <h2 className="text-xl font-semibold">Donate Items</h2>
-                    </div>
-
-                    <p className="text-gray-600 mb-6">
-                      Donate clothes, food, electronics, or other items to help those in need.
-                    </p>
-
-                    <form onSubmit={handleDonationSubmit} className="space-y-4">
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">Full Name</label>
-                        <input
-                          type="text"
-                          required
-                          value={donationForm.name}
-                          onChange={(e) => setDonationForm({ ...donationForm, name: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">Email Address</label>
-                        <input
-                          type="email"
-                          required
-                          value={donationForm.email}
-                          onChange={(e) => setDonationForm({ ...donationForm, email: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">Phone Number</label>
-                        <input
-                          type="tel"
-                          required
-                          value={donationForm.phone}
-                          onChange={(e) => setDonationForm({ ...donationForm, phone: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">Address for Pickup</label>
-                        <textarea
-                          rows={2}
-                          required
-                          value={donationForm.address}
-                          onChange={(e) => setDonationForm({ ...donationForm, address: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        ></textarea>
-                      </div>
-
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">Description of Items</label>
-                        <textarea
-                          rows={3}
-                          required
-                          placeholder="Please describe what you would like to donate"
-                          value={donationForm.itemDescription}
-                          onChange={(e) => setDonationForm({ ...donationForm, itemDescription: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        ></textarea>
-                      </div>
-
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">Upload Images (Optional)</label>
-                        <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center">
-                          <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            onChange={(e) => setDonationForm({ ...donationForm, image: [...donationForm.image, (e.target.files?.[0])] })}
-                            className="w-full mt-2"
-                          />
+            {/* Donate Tab Content - Only show for regular users */}
+            {isUser && (
+              <TabsContent value="donate">
+                <div className="grid md:grid-cols-2 gap-8 mt-8">
+                  {/* Money Donation */}
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="p-6">
+                      <div className="flex items-center mb-6">
+                        <div className="bg-hope-orange/10 p-3 rounded-full mr-4">
+                          <DollarSign className="h-6 w-6 text-hope-orange" />
                         </div>
+                        <h2 className="text-xl font-semibold">
+
+                        </h2>
+                      </div>
+
+                      <p className="text-gray-600 mb-6">
+                        Your financial contribution helps us continue our mission and make a difference in our community.
+                      </p>
+
+                      <div className="mb-6">
+                        <label className="block mb-2 font-medium">Enter donation amount ($)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          placeholder="0.00"
+                          value={donationAmount}
+                          onChange={(e) => setDonationAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3 mb-6">
+                        {[10, 25, 50, 100, 250, 500].map((amount) => (
+                          <Button
+                            key={amount}
+                            variant="outline"
+                            onClick={() => setDonationAmount(amount)}
+                            className={donationAmount === amount ? 'border-hope-orange text-hope-orange' : ''}
+                          >
+                            ${amount}
+                          </Button>
+                        ))}
                       </div>
 
                       <Button
-                        type="submit"
                         className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white"
+                        onClick={handleMoneyDonation}
+                        disabled={!isUser || !donationAmount}
                       >
-                        Submit Donation Request
+                        {!isUser ? 'Only users can donate' : 'Continue to Payment'}
                       </Button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Help Request Tab Content */}
-            <TabsContent value="help">
-              <div className="max-w-2xl mx-auto mt-8">
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="p-8">
-                    <div className="flex items-center mb-6">
-                      <div className="bg-hope-orange/10 p-3 rounded-full mr-4">
-                        <Send className="h-6 w-6 text-hope-orange" />
-                      </div>
-                      <h2 className="text-xl font-semibold">Request Assistance</h2>
                     </div>
+                  </div>
 
-                    <p className="text-gray-600 mb-8">
-                      If you or someone you know needs assistance, please fill out this form. We'll review your request and get back to you as soon as possible.
-                    </p>
-
-                    <form onSubmit={handleHelpSubmit} className="space-y-4">
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">
-                          Contact Phone
-                        </label>
-                        <input
-                          type="tel"
-                          autoComplete='tel'
-                          required
-                          value={helpForm.phone}
-                          onChange={(e) => setHelpForm({ ...helpForm, phone: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">Address</label>
-                        <input
-                          required
-                          autoComplete='address-line1'
-                          value={helpForm.address}
-                          onChange={(e) => setHelpForm({ ...helpForm, address: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        ></input>
-                      </div>
-
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">
-                          Description of Assistance Needed
-                        </label>
-                        <textarea
-                          rows={4}
-                          required
-                          placeholder="Please describe what kind of help you need and why"
-                          value={helpForm.description}
-                          onChange={(e) => setHelpForm({ ...helpForm, description: e.target.value })}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                        ></textarea>
-                      </div>
-
-                      <div>
-                        <label className="block mb-1 text-sm font-medium">Upload Supporting Images (Optional)</label>
-                        <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center">
-                          <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setHelpForm({ ...helpForm, image: [...donationForm.image, e.target.files?.[0]] })}
-                            className="w-full mt-2"
-                          />
+                  {/* Items Donation */}
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="p-6">
+                      <div className="flex items-center mb-6">
+                        <div className="bg-hope-orange/10 p-3 rounded-full mr-4">
+                          <Heart className="h-6 w-6 text-hope-orange" />
                         </div>
+                        <h2 className="text-xl font-semibold">Donate Items</h2>
                       </div>
 
-                      <div className="pt-4">
+                      <p className="text-gray-600 mb-6">
+                        Donate clothes, food, electronics, or other items to help those in need.
+                      </p>
+
+                      <form onSubmit={handleDonationSubmit(onSubmitDonation)} className="space-y-4">
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">Name</label>
+                          <input
+                            {...registerDonation('name')}
+                            className={`w-full px-4 py-2 rounded-lg border ${donationErrors.name ? 'border-red-500' : 'border-gray-300'}`}
+                          />
+                          {donationErrors.name && (
+                            <p className="text-red-500 text-sm mt-1">{donationErrors.name.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">Email Address</label>
+                          <input
+                            {...registerDonation('email')}
+                            className={`w-full px-4 py-2 rounded-lg border ${donationErrors.email ? 'border-red-500' : 'border-gray-300'}`}
+                          />
+                          {donationErrors.email && (
+                            <p className="text-red-500 text-sm mt-1">{donationErrors.email.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">Phone Number</label>
+                          <input
+                            {...registerDonation('phone')}
+                            className={`w-full px-4 py-2 rounded-lg border ${donationErrors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                          />
+                          {donationErrors.phone && (
+                            <p className="text-red-500 text-sm mt-1">{donationErrors.phone.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">Address for Pickup</label>
+                          <textarea
+                            {...registerDonation('address')}
+                            rows={2}
+                            className={`w-full px-4 py-2 rounded-lg border ${donationErrors.address ? 'border-red-500' : 'border-gray-300'}`}
+                          ></textarea>
+                          {donationErrors.address && (
+                            <p className="text-red-500 text-sm mt-1">{donationErrors.address.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">Description of Items</label>
+                          <textarea
+                            {...registerDonation('itemDescription')}
+                            rows={3}
+                            className={`w-full px-4 py-2 rounded-lg border ${donationErrors.itemDescription ? 'border-red-500' : 'border-gray-300'}`}
+                          ></textarea>
+                          {donationErrors.itemDescription && (
+                            <p className="text-red-500 text-sm mt-1">{donationErrors.itemDescription.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">Upload Images (Optional)</label>
+                          <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center">
+                            <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/*"
+                              onChange={(e) => setDonationForm({ ...donationForm, image: [...donationForm.image, (e.target.files?.[0])] })}
+                              className="w-full mt-2"
+                            />
+                          </div>
+                        </div>
+
                         <Button
                           type="submit"
-                          className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white py-3"
+                          className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white"
                         >
-                          Submit Help Request
+                          Submit Donation Request
                         </Button>
-                      </div>
-                    </form>
+                      </form>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </TabsContent>
+              </TabsContent>
+            )}
+
+            {/* Help Request Tab Content - Only show for regular users */}
+            {isUser && (
+              <TabsContent value="help">
+                <div className="max-w-2xl mx-auto mt-8">
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="p-8">
+                      <div className="flex items-center mb-6">
+                        <div className="bg-hope-orange/10 p-3 rounded-full mr-4">
+                          <Send className="h-6 w-6 text-hope-orange" />
+                        </div>
+                        <h2 className="text-xl font-semibold">Request Assistance</h2>
+                      </div>
+
+                      <p className="text-gray-600 mb-8">
+                        If you or someone you know needs assistance, please fill out this form. We'll review your request and get back to you as soon as possible.
+                      </p>
+
+                      <form onSubmit={handleHelpSubmit(onSubmitHelp)} className="space-y-4">
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">
+                            Contact Phone
+                          </label>
+                          <input
+                            {...registerHelp('phone')}
+                            className={`w-full px-4 py-2 rounded-lg border ${helpErrors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                          />
+                          {helpErrors.phone && (
+                            <p className="text-red-500 text-sm mt-1">{helpErrors.phone.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">Address</label>
+                          <input
+                            {...registerHelp('address')}
+                            className={`w-full px-4 py-2 rounded-lg border ${helpErrors.address ? 'border-red-500' : 'border-gray-300'}`}
+                          ></input>
+                          {helpErrors.address && (
+                            <p className="text-red-500 text-sm mt-1">{helpErrors.address.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">
+                            Description of Assistance Needed
+                          </label>
+                          <textarea
+                            {...registerHelp('description')}
+                            rows={4}
+                            className={`w-full px-4 py-2 rounded-lg border ${helpErrors.description ? 'border-red-500' : 'border-gray-300'}`}
+                          ></textarea>
+                          {helpErrors.description && (
+                            <p className="text-red-500 text-sm mt-1">{helpErrors.description.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-sm font-medium">Upload Supporting Images (Optional)</label>
+                          <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center">
+                            <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => setHelpForm({ ...helpForm, image: [...helpForm.image, e.target.files?.[0]] })}
+                              className="w-full mt-2"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="pt-4">
+                          <Button
+                            type="submit"
+                            className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white py-3"
+                          >
+                            Submit Help Request
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            )}
 
             {/* Contact Tab Content */}
             <TabsContent value="contact">

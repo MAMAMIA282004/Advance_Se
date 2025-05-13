@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +20,30 @@ import { ChangeHelpRequestStatus, GetUserHelpRequests } from '@/Api/helpRequest/
 import { ChangeDonationStatus, GetUserDonationRequests } from '@/Api/donations/donations';
 import { DialogFooter, Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog';
+import { toast } from 'sonner';
+import * as yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+// Validation schema for password change
+const passwordChangeSchema = yup.object({
+  currentPassword: yup.string().required('Current password is required'),
+  newPassword: yup
+    .string()
+    .required('New password is required')
+    .min(6, 'Password must be at least 6 characters')
+    .matches(/[^a-zA-Z0-9]/, 'Password must contain at least one special character')
+    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .test(
+      'three-different-characters',
+      'Password must use at least 3 different characters',
+      value => new Set(value).size >= 3
+    ),
+  confirmNewPassword: yup
+    .string()
+    .required('Please confirm your new password')
+    .oneOf([yup.ref('newPassword')], 'Passwords must match'),
+});
 
 const UserDashboard = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -31,6 +54,10 @@ const UserDashboard = () => {
   const [useHelpRequests, setHelpRequests] = useState<IUserHelpRequest[]>([]);
   const [passwordData, setPasswordData] = useState<IChangePasswordForm>();
   const [profilePhoto, setProfilePhoto] = useState<File | null>(profileData?.profilePhotoUrl ? new File([], profileData?.profilePhotoUrl) : null);
+
+  const { register: registerPassword, handleSubmit: handlePasswordSubmit, formState: { errors: passwordErrors }, reset: resetPassword } = useForm({
+    resolver: yupResolver(passwordChangeSchema)
+  });
 
   const handleOpenDialog = (isOpen: boolean) => {
     setViewDialogOpen(isOpen);
@@ -119,43 +146,31 @@ const UserDashboard = () => {
       else
         response = await ChangeHelpRequestStatus(id, 'Cancelled');
       if (response.status === 200) {
-        alert('Request cancelled successfully!');
+        toast.success('Request cancelled successfully!');
         if (type === "donate")
           fetchDonationRequests();
         else
           fetchHelpRequests();
-      } else {
-        alert('Failed to cancel the request. Please try again.');
       }
-    } catch (error) {
-      console.error('Error cancelling the request:', error);
-      alert('An error occurred while cancelling the request.');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to cancel the request. Please try again.');
     }
   };
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmitPasswordChange = async (data: any) => {
     try {
-      if (passwordData?.newPassword !== passwordData?.confirmNewPassword) {
-        alert('New password and confirm password do not match.');
-        return;
-      }
-
       const response = await UpdateUserPassword({
-        currentPassword: passwordData?.currentPassword,
-        newPassword: passwordData?.confirmNewPassword,
-        confirmNewPassword: passwordData?.confirmNewPassword,
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+        confirmNewPassword: data.confirmNewPassword,
       });
 
       if (response.status === 200) {
-        alert('Password changed successfully!');
-        setPasswordData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
-      } else {
-        alert('Failed to change password. Please try again.');
+        toast.success('Password changed successfully!');
+        resetPassword();
       }
-    } catch (error) {
-      console.error('Error changing password:', error);
-      alert('An error occurred while changing the password.');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to change password. Please try again.');
     }
   };
 
@@ -261,42 +276,46 @@ const UserDashboard = () => {
                       <CardDescription>Update your Password</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <form onSubmit={handleChangePassword} className="space-y-5">
+                      <form onSubmit={handlePasswordSubmit(onSubmitPasswordChange)} className="space-y-4">
                         <div>
-                          <label htmlFor="oldPassword" className="block mb-1 text-sm font-medium">Old Password</label>
+                          <label className="block mb-1 text-sm font-medium">Current Password</label>
                           <input
-                            id="oldPassword"
                             type="password"
-                            value={passwordData?.currentPassword}
-                            onChange={e => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            {...registerPassword('currentPassword')}
+                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'}`}
                           />
+                          {passwordErrors.currentPassword && (
+                            <p className="text-red-500 text-sm mt-1">{passwordErrors.currentPassword.message}</p>
+                          )}
                         </div>
+
                         <div>
-                          <label htmlFor="newPassword" className="block mb-1 text-sm font-medium">New Password</label>
+                          <label className="block mb-1 text-sm font-medium">New Password</label>
                           <input
-                            id="newPassword"
                             type="password"
-                            value={passwordData?.newPassword}
-                            onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            {...registerPassword('newPassword')}
+                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'}`}
                           />
+                          {passwordErrors.newPassword && (
+                            <p className="text-red-500 text-sm mt-1">{passwordErrors.newPassword.message}</p>
+                          )}
                         </div>
+
                         <div>
-                          <label htmlFor="confirmPassword" className="block mb-1 text-sm font-medium">Confirm Password</label>
+                          <label className="block mb-1 text-sm font-medium">Confirm New Password</label>
                           <input
-                            id="confirmPassword"
                             type="password"
-                            value={passwordData?.confirmNewPassword}
-                            onChange={e => setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            {...registerPassword('confirmNewPassword')}
+                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.confirmNewPassword ? 'border-red-500' : 'border-gray-300'}`}
                           />
+                          {passwordErrors.confirmNewPassword && (
+                            <p className="text-red-500 text-sm mt-1">{passwordErrors.confirmNewPassword.message}</p>
+                          )}
                         </div>
-                        <div>
-                          <Button type="submit" className="bg-hope-orange hover:bg-hope-dark-orange" >
-                            Change Password
-                          </Button>
-                        </div>
+
+                        <Button type="submit" className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white">
+                          Change Password
+                        </Button>
                       </form>
                     </CardContent>
                   </Card>

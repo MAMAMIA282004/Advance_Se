@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,10 +9,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { registerSchema } from '@/lib/validations';
 import { IRegisterForm } from '@/interfaces/interfaces';
 import { RegisterCharityCall, RegisterUserCall } from '@/Api/Auth/authinicatiton';
+import { toast } from 'sonner';
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const [userType, setUserType] = useState<'user' | 'charity'>('user');
   const { register, handleSubmit, formState: { errors }, reset } = useForm<IRegisterForm>({
@@ -21,41 +22,42 @@ const Signup = () => {
   });
 
   const submitFormData = async (data: IRegisterForm) => {
-    const formData = new FormData();
-    formData.append(userType === 'charity' ? "CharityName" : "FullName", data.fullName || '');
-    formData.append('Email', data.email || '');
-    formData.append('Password', data.password || '');
-    formData.append('ConfirmPassword', data.reEnterPassword || '');
-    formData.append('PhoneNumber', data.PhoneNumber || '');
-    formData.append('Address', data.address || '');
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append(userType === 'charity' ? "CharityName" : "FullName", data.fullName || '');
+      formData.append('Email', data.email || '');
+      formData.append('Password', data.password || '');
+      formData.append('ConfirmPassword', data.reEnterPassword || '');
+      formData.append('PhoneNumber', data.PhoneNumber || '');
+      formData.append('Address', data.address || '');
 
-    if (userType === 'charity' && data.pdf) {
-      formData.append('Country', "Egypt");
-      formData.append('Description', "NAN");
-      formData.append('Document', data.pdf[0]);
-      try {
+      if (userType === 'charity' && data.pdf) {
+        formData.append('Country', "Egypt");
+        formData.append('Description', "NAN");
+        formData.append('Document', data.pdf[0]);
         const res = await RegisterCharityCall(formData as IRegisterForm);
         if (res.status === 200) {
+          toast.success('Registration successful! Please login to continue.');
           reset();
           navigate('/login');
         }
-      } catch (error) {
-        console.error('Error submitting form data:', error);
-        throw error;
-      }
-    }
-
-    else if (userType === 'user') {
-      try {
+      } else if (userType === 'user') {
         const res = await RegisterUserCall(formData as IRegisterForm);
         if (res.status === 200) {
+          toast.success('Registration successful! Please login to continue.');
           reset();
           navigate('/login');
         }
-      } catch (error) {
-        console.error('Error submitting form data:', error);
-        throw error;
       }
+    } catch (error: any) {
+      // Handle backend errors
+      const errorMessage = error.response?.data?.data?.message || 
+                          error.response?.data?.message || 
+                          'Registration failed. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -201,11 +203,32 @@ const Signup = () => {
                 </div>
               )}
 
+              {/* Display validation errors */}
+              {errors.fullName && (
+                <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>
+              )}
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              )}
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+              )}
+              {errors.reEnterPassword && (
+                <p className="text-red-500 text-sm mt-1">{errors.reEnterPassword.message}</p>
+              )}
+              {errors.PhoneNumber && (
+                <p className="text-red-500 text-sm mt-1">{errors.PhoneNumber.message}</p>
+              )}
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+              )}
+
               <Button
                 type="submit"
                 className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white py-3 font-medium"
+                disabled={isSubmitting}
               >
-                Sign Up
+                {isSubmitting ? 'Signing up...' : 'Sign Up'}
               </Button>
 
               <div className="flex items-center justify-center my-4">
