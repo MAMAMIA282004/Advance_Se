@@ -18,7 +18,7 @@ export const registerSchema = yup
     password: yup
       .string()
       .required("Password is required")
-      .min(6, "Password must be at least 6 characters long")
+      .min(8, "Password must be at least 8 characters long")
       .matches(/[a-z]/, "Password must contain at least one lowercase letter")
       .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
       .matches(/[^a-zA-Z0-9]/, "Password must contain at least one special character")
@@ -62,7 +62,7 @@ export const passwordChangeSchema = yup.object({
   newPassword: yup
     .string()
     .required('New password is required')
-    .min(6, 'Password must be at least 6 characters')
+    .min(8, 'Password must be at least 8 characters')
     .matches(/[^a-zA-Z0-9]/, 'Password must contain at least one special character')
     .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
     .test(
