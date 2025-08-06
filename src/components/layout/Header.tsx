@@ -1,16 +1,14 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, X, Search, Settings, LogOut } from 'lucide-react';
+import { Menu, Search, Settings, LogOut } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '../ui/dropdown-menu';
 import Icon from '../ui/icon';
-import { Switch } from '../ui/switch';
 import { IUserData } from '@/interfaces/interfaces';
 import { GetUserData, Logout } from '@/lib/utils';
 
@@ -19,16 +17,37 @@ const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(userData !== null);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 0;
+      setScrolled(isScrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   function ChangeMenuState() {
-    setMenuOpen(menuOpen ? false : true)
+    setMenuOpen(!menuOpen);
   }
 
+  const handleLogout = () => {
+    Logout();
+    setIsLoggedIn(false);
+    navigate('/');
+  };
+
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto flex justify-between items-center py-3 px-4">
-        <NavLink to="/" className="flex items-center gap-2 text-hope-orange">
+    <header className={`professional-header ${scrolled ? 'scrolled' : ''}`}>
+      <div className="container mx-auto flex justify-between items-center py-4 px-4">
+        <NavLink to="/" className="flex items-center gap-2">
           <Icon size={8}></Icon>
-          <span className="font-bold text-xl md:text-2xl">HopeGivers</span>
+          <span className="header-logo">HopeGivers</span>
         </NavLink>
 
         {/* Desktop Navigation */}
@@ -36,8 +55,7 @@ const Header = () => {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `text-hope-dark-gray hover:text-hope-orange transition-colors ${isActive ? "text-hope-orange border-b border-hope-orange" : ""
-              }`
+              `nav-link ${isActive ? "active" : ""}`
             }
           >
             Home
@@ -45,8 +63,7 @@ const Header = () => {
           <NavLink
             to="/charities"
             className={({ isActive }) =>
-              `text-hope-dark-gray hover:text-hope-orange transition-colors ${isActive ? "text-hope-orange border-b border-hope-orange" : ""
-              }`
+              `nav-link ${isActive ? "active" : ""}`
             }
           >
             Charities
@@ -54,8 +71,7 @@ const Header = () => {
           <NavLink
             to="/about"
             className={({ isActive }) =>
-              `text-hope-dark-gray hover:text-hope-orange transition-colors ${isActive ? "text-hope-orange border-b border-hope-orange" : ""
-              }`
+              `nav-link ${isActive ? "active" : ""}`
             }
           >
             About
@@ -63,13 +79,12 @@ const Header = () => {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <div className="relative">
+          <div className="professional-search">
             <input
               type="text"
               placeholder="Search..."
-              className="py-2 pl-3 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50 text-sm"
             />
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Search className="search-icon" />
           </div>
 
           {!isLoggedIn ? (
@@ -77,36 +92,55 @@ const Header = () => {
               <Button
                 variant="ghost"
                 onClick={() => navigate('/login')}
-                className="text-hope-dark-gray hover:text-hope-orange hover:bg-hope-gray"
+                className="btn-ghost-professional"
               >
                 Sign In
               </Button>
               <Button
                 onClick={() => navigate('/signup')}
-                className="bg-hope-orange hover:bg-hope-dark-orange text-white"
+                className="btn-primary-professional"
               >
                 Sign Up
               </Button>
             </>
           ) : (
-            <DropdownMenu open={menuOpen} onOpenChange={ChangeMenuState} >
-              <DropdownMenuTrigger className="bg-hope-orange hover:bg-hope-dark-orange text-white p-2 rounded-full focus:outline-none"><Settings /></DropdownMenuTrigger>
-              <DropdownMenuContent className='flex flex-col'>
-                <>
-                  {userData?.roles.length > 1 ?
-                    <Link to="/dashboard/admin" className="text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
-                      Admin Dashboard
+            <DropdownMenu open={menuOpen} onOpenChange={ChangeMenuState}>
+              <DropdownMenuTrigger asChild>
+                <Button className="btn-primary-professional p-2 rounded-full focus:outline-none">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='flex flex-col p-2 min-w-[180px]'>
+                {userData?.roles.length > 1 ? (
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard/admin" className="nav-link py-2 px-3 flex items-center gap-2">
+                      <Settings className="h-4 w-4" /> Admin Dashboard
                     </Link>
-                    : userData?.roles[0] === 'charity' ?
-                      <Link to="/dashboard/charity" className="text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
-                        Charity Dashboard
-                      </Link> :
-                      <Link to="/dashboard/user" className="text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
-                        User Dashboard
-                      </Link>
-                  }
-                  <Button type='submit' name='logout' variant='ghost' className="text-hope-dark-gray hover:bg-white px-2 py-6 justify-start text-base hover:text-hope-orange transition-colors" onClick={() => Logout()}>Logout</Button>
-                </>
+                  </DropdownMenuItem>
+                ) : userData?.roles[0] === 'charity' ? (
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard/charity" className="nav-link py-2 px-3 flex items-center gap-2">
+                      <Settings className="h-4 w-4" /> Charity Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard/user" className="nav-link py-2 px-3 flex items-center gap-2">
+                      <Settings className="h-4 w-4" /> User Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem asChild>
+                  <Button
+                    type='button'
+                    name='logout'
+                    variant='ghost'
+                    className="nav-link w-full justify-start py-2 px-3 flex items-center gap-2"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" /> Logout
+                  </Button>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -116,70 +150,75 @@ const Header = () => {
         <div className="md:hidden flex items-center gap-2">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="btn-ghost-professional">
+                <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
-              <div className="flex flex-col gap-6 mt-10">
-                <Link to="/" className="text-xl font-medium hover:text-hope-orange transition-colors">
+            <SheetContent side="right" className="w-[250px] sm:w-[300px]">
+              <div className="flex flex-col gap-4 mt-8">
+                <Link to="/" className="nav-link text-lg font-medium py-2 px-3">
                   Home
                 </Link>
-                <Link to="/charities" className="text-xl font-medium hover:text-hope-orange transition-colors">
+                <Link to="/charities" className="nav-link text-lg font-medium py-2 px-3">
                   Charities
                 </Link>
-                <Link to="/about" className="text-xl font-medium hover:text-hope-orange transition-colors">
+                <Link to="/about" className="nav-link text-lg font-medium py-2 px-3">
                   About
                 </Link>
-                <div className="border-t pt-6 mt-2">
+                <div className="border-t pt-6 mt-4">
                   {!isLoggedIn ? (
                     <div className="flex flex-col gap-3">
                       <Button
                         onClick={() => navigate('/login')}
                         variant="outline"
-                        className="w-full"
+                        className="btn-secondary-professional w-full"
                       >
                         Sign In
                       </Button>
                       <Button
                         onClick={() => navigate('/signup')}
-                        className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white"
+                        className="btn-primary-professional w-full"
                       >
                         Sign Up
                       </Button>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-3">
-                      {userData?.roles.length > 1 ?
-                        <Link to="/dashboard/admin" className="flex gap-3 items-center text-lg text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
-                          <Settings />
-                          <p>Admin Dashboard</p>
+                      {userData?.roles.length > 1 ? (
+                        <Link to="/dashboard/admin" className="nav-link text-lg py-2 px-3 flex items-center gap-2">
+                          <Settings className="h-5 w-5" /> Admin Dashboard
                         </Link>
-                        : userData?.roles[0] === 'charity' ?
-                          <Link to="/dashboard/charity" className="flex gap-3 items-center text-lg text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
-                            <Settings />
-                            <p>Charity Dashboard</p>
-                          </Link> :
-                          < Link to="/dashboard/user" className="flex gap-3 items-center text-lg text-hope-dark-gray px-2 py-3 hover:text-hope-orange transition-colors">
-                            <Settings />
-                            <p>User Dashboard</p>
-                          </Link >
-                      }
-                      <div className="flex gap-3 items-center text-lg text-hope-dark-gray px-3 py-3 hover:text-hope-orange transition-colors">
-                        <LogOut />
-                        <Button type='submit' name='logout' variant='ghost' className="text-hope-dark-gray p-0 hover:bg-white text-lg hover:text-hope-orange transition-colors" onClick={() => Logout()}>Logout</Button>
-                      </div>
+                      ) : userData?.roles[0] === 'charity' ? (
+                        <Link to="/dashboard/charity" className="nav-link text-lg py-2 px-3 flex items-center gap-2">
+                          <Settings className="h-5 w-5" /> Charity Dashboard
+                        </Link>
+                      ) : (
+                        <Link to="/dashboard/user" className="nav-link text-lg py-2 px-3 flex items-center gap-2">
+                          <Settings className="h-5 w-5" /> User Dashboard
+                        </Link>
+                      )}
+                      <Button
+                        type='button'
+                        name='logout'
+                        variant='ghost'
+                        className="nav-link w-full justify-start text-lg py-2 px-3 flex items-center gap-2"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="h-5 w-5" /> Logout
+                      </Button>
                     </div>
                   )}
                 </div>
               </div>
             </SheetContent>
           </Sheet>
-        </div >
-      </div >
-    </header >
+        </div>
+      </div>
+    </header>
   );
 };
 
 export default Header;
+
+

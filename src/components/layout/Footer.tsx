@@ -1,89 +1,74 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Mail } from 'lucide-react';
+import { Mail, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Icon from '../ui/icon';
 
 const Footer = () => {
   return (
-    <footer className="bg-hope-orange text-white">
-      <div className="container mx-auto py-10 px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          <div className="space-y-4">
+    <footer className="professional-footer">
+      <div className="container mx-auto py-12 px-4 md:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div className="space-y-6">
             <div className="flex items-center gap-2">
-              <Icon size={8} mode='light'></Icon>
-              <span className="font-bold text-xl">HopeGivers</span>
+              <Icon size={8}></Icon>
+              <span className="header-logo text-white">HopeGivers</span>
             </div>
-            <p className="text-white/80 max-w-xs">
+            <p className="text-hope-gray-400 leading-relaxed">
               Connecting generous donors with impactful charities to make a difference in our communities.
             </p>
-            <div className="pt-2">
-              <h3 className="font-medium mb-2">For news</h3>
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="py-2 px-3 text-hope-dark-gray rounded-l-md focus:outline-none w-full max-w-[200px]"
-                />
-                <Button
-                  type="submit"
-                  className="bg-hope-dark-orange hover:bg-hope-dark-orange/90 rounded-l-none"
-                >
-                  <Mail className="h-4 w-4" />
-                </Button>
-              </div>
+            <div className="flex space-x-4 footer-social-icons">
+              <a href="#" aria-label="Facebook"><Facebook className="h-5 w-5" /></a>
+              <a href="#" aria-label="Twitter"><Twitter className="h-5 w-5" /></a>
+              <a href="#" aria-label="Instagram"><Instagram className="h-5 w-5" /></a>
+              <a href="#" aria-label="LinkedIn"><Linkedin className="h-5 w-5" /></a>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 md:col-span-2">
-            <div className="space-y-3">
-              <h3 className="font-medium text-lg">Main Links</h3>
-              <div className="space-y-2">
-                <Link to="/" className="block text-white/80 hover:text-white transition-colors">
-                  Home
-                </Link>
-                <Link to="/categories" className="block text-white/80 hover:text-white transition-colors">
-                  Categories
-                </Link>
-                <Link to="/search" className="block text-white/80 hover:text-white transition-colors">
-                  Search
-                </Link>
-                <Link to="/about" className="block text-white/80 hover:text-white transition-colors">
-                  About us
-                </Link>
-              </div>
-            </div>
+          <div className="space-y-6">
+            <h3 className="footer-heading">Main Links</h3>
+            <ul className="footer-links">
+              <li><Link to="/" className="hover:underline">Home</Link></li>
+              <li><Link to="/categories" className="hover:underline">Categories</Link></li>
+              <li><Link to="/search" className="hover:underline">Search</Link></li>
+              <li><Link to="/about" className="hover:underline">About us</Link></li>
+            </ul>
+          </div>
 
-            <div className="space-y-3">
-              <h3 className="font-medium text-lg">Company</h3>
-              <div className="space-y-2">
-                <Link to="/blog" className="block text-white/80 hover:text-white transition-colors">
-                  Blog
-                </Link>
-                <Link to="/careers" className="block text-white/80 hover:text-white transition-colors">
-                  Careers
-                </Link>
-                <Link to="/news" className="block text-white/80 hover:text-white transition-colors">
-                  News
-                </Link>
-              </div>
+          <div className="space-y-6">
+            <h3 className="footer-heading">Company</h3>
+            <ul className="footer-links">
+              <li><Link to="/blog" className="hover:underline">Blog</Link></li>
+              <li><Link to="/careers" className="hover:underline">Careers</Link></li>
+              <li><Link to="/news" className="hover:underline">News</Link></li>
+            </ul>
+          </div>
+
+          <div className="space-y-6">
+            <h3 className="footer-heading">Stay Updated</h3>
+            <p className="text-hope-gray-400">Subscribe to our newsletter for the latest updates.</p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="py-2 px-4 rounded-lg bg-hope-gray-700 text-white placeholder-hope-gray-400 focus:outline-none focus:ring-2 focus:ring-hope-orange-500 w-full"
+              />
+              <Button
+                type="submit"
+                className="btn-primary-professional flex-shrink-0"
+              >
+                <Mail className="h-4 w-4 mr-2" /> Subscribe
+              </Button>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-white/20 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-white/80 text-sm">© 2025 HopeGivers</p>
-          <div className="flex gap-4 mt-4 md:mt-0">
-            <Link to="/terms" className="text-white/80 hover:text-white text-sm">
-              Terms and conditions
-            </Link>
-            <Link to="/privacy" className="text-white/80 hover:text-white text-sm">
-              Privacy Policy
-            </Link>
-            <Link to="/cookies" className="text-white/80 hover:text-white text-sm">
-              Cookies
-            </Link>
+        <div className="border-t border-hope-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-hope-gray-500 text-sm">
+          <p className="mb-4 md:mb-0">© {new Date().getFullYear()} HopeGivers. All rights reserved.</p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <Link to="/terms" className="hover:underline">Terms and conditions</Link>
+            <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+            <Link to="/cookies" className="hover:underline">Cookies</Link>
           </div>
         </div>
       </div>
@@ -92,3 +77,5 @@ const Footer = () => {
 };
 
 export default Footer;
+
+
