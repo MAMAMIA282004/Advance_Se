@@ -32,28 +32,39 @@ const Signup = () => {
       formData.append('PhoneNumber', data.PhoneNumber || '');
       formData.append('Address', data.address || '');
 
+      let res;
       if (userType === 'charity' && data.pdf) {
         formData.append('Country', "Egypt");
         formData.append('Description', "NAN");
         formData.append('Document', data.pdf[0]);
-        const res = await RegisterCharityCall(formData as IRegisterForm);
-        if (res.status === 200) {
-          toast.success('Registration successful! Please login to continue.');
-          reset();
-          navigate('/login');
-        }
+        res = await RegisterCharityCall(formData as IRegisterForm);
       } else if (userType === 'user') {
-        const res = await RegisterUserCall(formData as IRegisterForm);
-        if (res.status === 200) {
-          toast.success('Registration successful! Please login to continue.');
-          reset();
-          navigate('/login');
-        }
+        res = await RegisterUserCall(formData as IRegisterForm);
       }
-    } catch (error) {
-      const errorMessage = error.response?.data?.data?.message ||
-        error.response?.data?.message ||
-        'Registration failed. Please try again.';
+
+      // Check if registration was successful
+      if (res && (res.status === 200 || res.status === 201)) {
+        toast.success('Registration successful! Please login to continue.');
+        reset();
+        navigate('/login');
+      } else {
+        // Handle unexpected response status
+        const errorMessage = res?.data?.message || 'Registration failed. Please try again.';
+        toast.error(errorMessage);
+      }
+    } catch (error: unknown) {
+      console.error('Registration error:', error);
+      let errorMessage = 'Registration failed. Please try again.';
+
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { data?: { message?: string }, message?: string } } };
+        errorMessage = axiosError.response?.data?.data?.message ||
+          axiosError.response?.data?.message ||
+          errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -62,205 +73,190 @@ const Signup = () => {
 
   return (
     <MainLayout hideFooter>
-      <div className="flex flex-col items-center md:flex-row">
-        {/* Left side with image - Hidden on mobile */}
-        <div className="hidden md:flex md:flex-col md:w-1/2 p-10">
-          <div className="flex items-center justify-center gap-2 text-hope-orange mb-10">
-            <div className="flex justify-center items-center">
-              <img src="/lovable-uploads/signup.png" alt="HopeGivers illustration" className="w-full" />
+      <div className="enhanced-auth-container">
+        <div className="flex flex-col items-center md:flex-row min-h-screen">
+          {/* Left side with image - Hidden on mobile */}
+          <div className="hidden md:flex md:flex-col md:w-1/2 enhanced-auth-side p-10">
+            <div className="flex items-center justify-center gap-2 text-hope-orange h-full">
+              <div className="flex justify-center items-center">
+                <img src="/lovable-uploads/signup.png" alt="HopeGivers illustration" className="w-full" />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right side with form */}
-        <div className="flex-1 flex flex-col justify-center items-center p-6 md:p-10">
-          <div className="w-full max-w-md">
-            <div className="mb-10">
-              <div className="flex mb-4 items-center">
-                <Icon size={10}></Icon>
-                <h1 className='ml-2 text-4xl text-hope-orange font-bold'>HopeGivers</h1>
-              </div>
-              <p className="text-gray-600">Please fill your detail to access your account</p>
-            </div>
-
-            {/* Toggle between User and Charity */}
-            <div className="flex border border-gray-300 rounded-full p-1 mb-6">
-              <button
-                onClick={() => setUserType('user')}
-                className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${userType === 'user'
-                  ? 'bg-hope-orange text-white'
-                  : 'text-gray-500 hover:text-hope-dark-orange'
-                  }`}
-              >
-                Regular User
-              </button>
-              <button
-                onClick={() => setUserType('charity')}
-                className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${userType === 'charity'
-                  ? 'bg-hope-orange text-white'
-                  : 'text-gray-500 hover:text-hope-dark-orange'
-                  }`}
-              >
-                Charity
-              </button>
-            </div>
-
-            <form className="space-y-4" onSubmit={handleSubmit(submitFormData)}>
-              <div>
-                <input
-                  {...register('fullName')}
-                  type="text"
-                  placeholder="Full Name"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                />
-                {errors.fullName && (
-                  <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>
-                )}
-              </div>
-
-              <div>
-                <input
-                  {...register('email')}
-                  type="email"
-                  placeholder="Email"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-                )}
-              </div>
-
-              <div className="relative">
-                <input
-                  {...register('password')}
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Password"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-                {errors.password && (
-                  <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-                )}
-              </div>
-
-              <div className="relative">
-                <input
-                  {...register('reEnterPassword')}
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm Password"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-                {errors.reEnterPassword && (
-                  <p className="text-red-500 text-sm mt-1">{errors.reEnterPassword.message}</p>
-                )}
-              </div>
-
-              <div>
-                <input
-                  {...register('address')}
-                  type="text"
-                  placeholder="Address"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                />
-                {errors.address && (
-                  <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
-                )}
-              </div>
-
-              <div>
-                <input
-                  {...register('PhoneNumber')}
-                  type="tel"
-                  placeholder="Phone Number"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                />
-                {errors.PhoneNumber && (
-                  <p className="text-red-500 text-sm mt-1">{errors.PhoneNumber.message}</p>
-                )}
-              </div>
-
-              {userType === 'charity' && (
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Verification Document (PDF)
-                  </label>
-                  <div className="border border-dashed border-gray-300 rounded-lg p-4">
-                    <div className="text-center">
-                      <p className="text-gray-500 text-sm">Upload PDF file to verify your charity status</p>
-                      <input
-                        {...register('pdf')}
-                        type="file"
-                        accept=".pdf"
-                        multiple={false}
-                        required={userType === 'charity'}
-                        className="block w-full text-sm text-gray-500 mt-3
-                          file:mr-4 file:py-2 file:px-4
-                          file:rounded-full file:border-0
-                          file:text-sm file:font-semibold
-                          file:bg-hope-orange file:text-white
-                          hover:file:bg-hope-dark-orange"
-                      />
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    * Please upload legal documentation confirming your charity status. This will be reviewed by our team.
-                  </p>
+          {/* Right side with form */}
+          <div className="flex-1 flex flex-col justify-center items-center p-6 md:p-10 relative z-10">
+            <div className="enhanced-auth-form-container">
+              <div className="enhanced-auth-header">
+                <div className="enhanced-auth-logo">
+                  <Icon size={10}></Icon>
+                  <h1 className="enhanced-auth-title">HopeGivers</h1>
                 </div>
-              )}
-
-
-
-
-
-
-
-              <Button
-                type="submit"
-                className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white py-3 font-medium"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Signing up...' : 'Sign Up'}
-              </Button>
-
-              <div className="flex items-center justify-center my-4">
-                <span className="border-b flex-grow border-gray-300"></span>
-                <span className="px-3 text-gray-500 text-sm">Or sign up with</span>
-                <span className="border-b flex-grow border-gray-300"></span>
+                <p className="enhanced-auth-subtitle">Create your account and start making a difference</p>
               </div>
 
-              <Button
-                variant="outline"
-                className="w-full flex items-center justify-center gap-2 py-3 border border-gray-300"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512" className="h-4 w-4" fill="currentColor">
-                  <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" />
-                </svg>
-                Sign Up with Google
-              </Button>
-            </form>
+              {/* Enhanced Toggle between User and Charity */}
+              <div className="enhanced-auth-toggle">
+                <button
+                  type="button"
+                  onClick={() => setUserType('user')}
+                  className={`enhanced-auth-toggle-btn ${userType === 'user' ? 'active' : ''}`}
+                >
+                  Regular User
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUserType('charity')}
+                  className={`enhanced-auth-toggle-btn ${userType === 'charity' ? 'active' : ''}`}
+                >
+                  Charity
+                </button>
+              </div>
 
-            <p className="text-center mt-8 text-gray-600">
-              Already have an account? <Link to="/login" className="text-hope-orange font-medium hover:underline">Sign In</Link>
-            </p>
+              <form className="enhanced-auth-form" onSubmit={handleSubmit(submitFormData)}>
+                <div className="enhanced-auth-input-group">
+                  <input
+                    {...register('fullName')}
+                    type="text"
+                    placeholder={userType === 'charity' ? 'Charity Name' : 'Full Name'}
+                    className={`enhanced-auth-input ${errors.fullName ? 'error' : ''}`}
+                  />
+                  {errors.fullName && (
+                    <div className="enhanced-auth-error">
+                      <span>⚠</span> {String(errors.fullName.message)}
+                    </div>
+                  )}
+                </div>
 
-            {userType === 'user' && (
-              <p className="text-center mt-2 text-sm text-gray-500">
-                Are you a charity? <span className="text-hope-orange cursor-pointer hover:underline" onClick={() => setUserType('charity')}>Sign up here</span>
-              </p>
-            )}
+                <div className="enhanced-auth-input-group">
+                  <input
+                    {...register('email')}
+                    type="email"
+                    placeholder="Email Address"
+                    className={`enhanced-auth-input ${errors.email ? 'error' : ''}`}
+                  />
+                  {errors.email && (
+                    <div className="enhanced-auth-error">
+                      <span>⚠</span> {String(errors.email.message)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="enhanced-auth-input-group">
+                  <input
+                    {...register('password')}
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Password"
+                    className={`enhanced-auth-input ${errors.password ? 'error' : ''}`}
+                  />
+                  <button
+                    type="button"
+                    className="enhanced-auth-input-icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                  {errors.password && (
+                    <div className="enhanced-auth-error">
+                      <span>⚠</span> {String(errors.password.message)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="enhanced-auth-input-group">
+                  <input
+                    {...register('reEnterPassword')}
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Confirm Password"
+                    className={`enhanced-auth-input ${errors.reEnterPassword ? 'error' : ''}`}
+                  />
+                  <button
+                    type="button"
+                    className="enhanced-auth-input-icon"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                  {errors.reEnterPassword && (
+                    <div className="enhanced-auth-error">
+                      <span>⚠</span> {String(errors.reEnterPassword.message)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="enhanced-auth-input-group">
+                  <input
+                    {...register('address')}
+                    type="text"
+                    placeholder="Address"
+                    className={`enhanced-auth-input ${errors.address ? 'error' : ''}`}
+                  />
+                  {errors.address && (
+                    <div className="enhanced-auth-error">
+                      <span>⚠</span> {String(errors.address.message)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="enhanced-auth-input-group">
+                  <input
+                    {...register('PhoneNumber')}
+                    type="tel"
+                    placeholder="Phone Number"
+                    className={`enhanced-auth-input ${errors.PhoneNumber ? 'error' : ''}`}
+                  />
+                  {errors.PhoneNumber && (
+                    <div className="enhanced-auth-error">
+                      <span>⚠</span> {String(errors.PhoneNumber.message)}
+                    </div>
+                  )}
+                </div>
+
+                {userType === 'charity' && (
+                  <div className="enhanced-auth-input-group">
+                    <label className="block text-sm font-semibold text-hope-gray-700 mb-3">
+                      Verification Document (PDF)
+                    </label>
+                    <div className="enhanced-auth-file-upload">
+                      <div className="text-center relative z-10">
+                        <p className="text-hope-gray-600 text-sm mb-2">Upload PDF file to verify your charity status</p>
+                        <input
+                          {...register('pdf')}
+                          type="file"
+                          accept=".pdf"
+                          multiple={false}
+                          required={userType === 'charity'}
+                          className="enhanced-auth-file-input"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-hope-gray-500 mt-2">
+                      * Please upload legal documentation confirming your charity status. This will be reviewed by our team.
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="enhanced-auth-submit-btn"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Creating account...' : 'Create Account'}
+                </button>
+              </form>
+
+              <div className="enhanced-auth-link">
+                <p className="enhanced-auth-link-text">
+                  Already have an account? <Link to="/login" className="enhanced-auth-link-anchor">Sign In</Link>
+                </p>
+
+                {userType === 'user' && (
+                  <p className="text-center mt-2 text-sm text-hope-gray-500">
+                    Are you a charity? <span className="enhanced-auth-link-anchor cursor-pointer" onClick={() => setUserType('charity')}>Sign up here</span>
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

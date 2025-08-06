@@ -10,11 +10,11 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '../ui/dropdown-menu';
 import Icon from '../ui/icon';
 import { IUserData } from '@/interfaces/interfaces';
-import { GetUserData, Logout } from '@/lib/utils';
+import { GetUserData, Logout, IsAuthenticated, HasRole, GetDashboardPath } from '@/lib/utils';
 
 const Header = () => {
-  const userData: IUserData = GetUserData();
-  const [isLoggedIn, setIsLoggedIn] = useState(userData !== null);
+  const [userData, setUserData] = useState<IUserData | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -32,6 +32,29 @@ const Header = () => {
     };
   }, []);
 
+  useEffect(() => {
+    // Check authentication status on component mount and route changes
+    const checkAuth = () => {
+      const isAuth = IsAuthenticated();
+      const user = GetUserData();
+      setIsLoggedIn(isAuth);
+      setUserData(user);
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (if user logs in/out in another tab)
+    const handleStorageChange = () => {
+      checkAuth();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   function ChangeMenuState() {
     setMenuOpen(!menuOpen);
   }
@@ -39,7 +62,13 @@ const Header = () => {
   const handleLogout = () => {
     Logout();
     setIsLoggedIn(false);
+    setUserData(null);
     navigate('/');
+  };
+
+  const handleDashboardNavigation = () => {
+    const dashboardPath = GetDashboardPath();
+    navigate(dashboardPath);
   };
 
   return (
@@ -111,22 +140,38 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className='flex flex-col p-2 min-w-[180px]'>
-                {userData?.roles.length > 1 ? (
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard/admin" className="nav-link py-2 px-3 flex items-center gap-2">
-                      <Settings className="h-4 w-4" /> Admin Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                ) : userData?.roles[0] === 'charity' ? (
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard/charity" className="nav-link py-2 px-3 flex items-center gap-2">
-                      <Settings className="h-4 w-4" /> Charity Dashboard
-                    </Link>
-                  </DropdownMenuItem>
+                {/* Check if user has multiple roles or use HasRole for single role */}
+                {((Array.isArray(userData?.roles) && userData.roles.length > 1) ||
+                  (typeof userData?.roles === 'string' && userData.roles.includes(','))) ? (
+                  // Multiple roles - show all available dashboards
+                  <>
+                    {HasRole('Admin') && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin-dashboard" className="nav-link py-2 px-3 flex items-center gap-2">
+                          <Settings className="h-4 w-4" /> Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {HasRole('Charity') && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/charity-dashboard" className="nav-link py-2 px-3 flex items-center gap-2">
+                          <Settings className="h-4 w-4" /> Charity Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {HasRole('User') && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/user-dashboard" className="nav-link py-2 px-3 flex items-center gap-2">
+                          <Settings className="h-4 w-4" /> User Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                  </>
                 ) : (
+                  // Single role - show primary dashboard
                   <DropdownMenuItem asChild>
-                    <Link to="/dashboard/user" className="nav-link py-2 px-3 flex items-center gap-2">
-                      <Settings className="h-4 w-4" /> User Dashboard
+                    <Link to={GetDashboardPath()} className="nav-link py-2 px-3 flex items-center gap-2">
+                      <Settings className="h-4 w-4" /> Dashboard
                     </Link>
                   </DropdownMenuItem>
                 )}
@@ -185,27 +230,49 @@ const Header = () => {
                     </div>
                   ) : (
                     <div className="flex flex-col gap-3">
-                      {userData?.roles.length > 1 ? (
-                        <Link to="/dashboard/admin" className="nav-link text-lg py-2 px-3 flex items-center gap-2">
-                          <Settings className="h-5 w-5" /> Admin Dashboard
-                        </Link>
-                      ) : userData?.roles[0] === 'charity' ? (
-                        <Link to="/dashboard/charity" className="nav-link text-lg py-2 px-3 flex items-center gap-2">
-                          <Settings className="h-5 w-5" /> Charity Dashboard
-                        </Link>
+                      {/* Check if user has multiple roles */}
+                      {((Array.isArray(userData?.roles) && userData.roles.length > 1) ||
+                        (typeof userData?.roles === 'string' && userData.roles.includes(','))) ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button className="btn-primary-professional w-full">
+                              Dashboard <Settings className="w-4 h-4 ml-2" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            {HasRole('Admin') && (
+                              <DropdownMenuItem onClick={() => navigate('/admin-dashboard')}>
+                                Admin Dashboard
+                              </DropdownMenuItem>
+                            )}
+                            {HasRole('Charity') && (
+                              <DropdownMenuItem onClick={() => navigate('/charity-dashboard')}>
+                                Charity Dashboard
+                              </DropdownMenuItem>
+                            )}
+                            {HasRole('User') && (
+                              <DropdownMenuItem onClick={() => navigate('/user-dashboard')}>
+                                User Dashboard
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       ) : (
-                        <Link to="/dashboard/user" className="nav-link text-lg py-2 px-3 flex items-center gap-2">
-                          <Settings className="h-5 w-5" /> User Dashboard
-                        </Link>
+                        <Button
+                          onClick={handleDashboardNavigation}
+                          className="btn-primary-professional w-full"
+                        >
+                          <Settings className="h-5 w-5 mr-2" /> Dashboard
+                        </Button>
                       )}
                       <Button
                         type='button'
                         name='logout'
-                        variant='ghost'
-                        className="nav-link w-full justify-start text-lg py-2 px-3 flex items-center gap-2"
+                        variant='outline'
+                        className="btn-secondary-professional w-full"
                         onClick={handleLogout}
                       >
-                        <LogOut className="h-5 w-5" /> Logout
+                        <LogOut className="h-5 w-5 mr-2" /> Logout
                       </Button>
                     </div>
                   )}

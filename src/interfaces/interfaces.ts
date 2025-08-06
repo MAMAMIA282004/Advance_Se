@@ -12,7 +12,7 @@ export interface IUserData {
   profilePhotoUrl: string,
   wallpaperPhotoUrl: string,
   isEmailConfirmed: boolean,
-  roles: string
+  roles: string | string[] // Support both string and array formats
   token: string,
   expireAt: string
 }

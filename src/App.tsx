@@ -14,7 +14,7 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import CharitiesList from "./pages/charities/CharitiesList";
 import CharityProfile from "./pages/charities/CharityProfile";
 import About from "./pages/About";
-import { GetUserData } from "./lib/utils";
+import { GetUserData, HasRole } from "./lib/utils";
 import DonationSuccess from "./pages/DonationSuccess";
 
 const queryClient = new QueryClient();
@@ -34,17 +34,17 @@ const App = () => (
               <Route path="/signup" element={<Signup />} />
             </>
           )}
-          {(userData && (userData?.roles[0] === "user")) &&
+          {(userData && HasRole("user")) &&
             <>
-              <Route path="/dashboard/user" element={<UserDashboard />} />
+              <Route path="/user-dashboard" element={<UserDashboard />} />
               <Route path="/donationSuccess" element={<DonationSuccess />} />
             </>
           }
-          {(userData && (userData?.roles[0] === "charity")) &&
-            <Route path="/dashboard/charity" element={<CharityDashboard />} />
+          {(userData && HasRole("charity")) &&
+            <Route path="/charity-dashboard" element={<CharityDashboard />} />
           }
-          {(userData && userData.roles.length > 1 && (userData?.roles[1] === "admin")) &&
-            <Route path="/dashboard/admin" element={<AdminDashboard />} />
+          {(userData && HasRole("admin")) &&
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
           }
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />

@@ -366,462 +366,490 @@ const CharityDashboard = () => {
 
   return (
     <MainLayout>
-      <div className="bg-hope-gray py-8">
+      <div className="enhanced-dashboard-container">
+        {/* Enhanced Dashboard Header */}
+        <div className="enhanced-dashboard-header">
+          <div className="container mx-auto px-4">
+            <h1 className="enhanced-dashboard-title">Charity Dashboard</h1>
+            <p className="enhanced-dashboard-subtitle">Manage your charity profile, branches, donations, and help requests</p>
+          </div>
+        </div>
+
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-hope-dark-gray mb-6">Charity Dashboard</h1>
+          {/* Enhanced Dashboard Stats */}
+          <div className="enhanced-dashboard-stat-grid">
+            <div className="enhanced-dashboard-stat-card">
+              <span className="enhanced-dashboard-stat-number">{branches?.length || 0}</span>
+              <span className="enhanced-dashboard-stat-label">Active Branches</span>
+            </div>
+            <div className="enhanced-dashboard-stat-card">
+              <span className="enhanced-dashboard-stat-number">{donationRequests.length}</span>
+              <span className="enhanced-dashboard-stat-label">Donation Requests</span>
+            </div>
+            <div className="enhanced-dashboard-stat-card">
+              <span className="enhanced-dashboard-stat-number">{helpRequests.length}</span>
+              <span className="enhanced-dashboard-stat-label">Help Requests</span>
+            </div>
+            <div className="enhanced-dashboard-stat-card">
+              <span className="enhanced-dashboard-stat-number">{posts?.length || 0}</span>
+              <span className="enhanced-dashboard-stat-label">Published Posts</span>
+            </div>
+          </div>
 
-          <Tabs defaultValue="profile">
-            <TabsList className="mb-8 bg-white flex justify-around">
-              <TabsTrigger value="profile" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Profile</TabsTrigger>
-              <TabsTrigger value="branches" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Branches</TabsTrigger>
-              <TabsTrigger value="donations" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Donations</TabsTrigger>
-              <TabsTrigger value="help" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Help</TabsTrigger>
-              <TabsTrigger value="posts" className="data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none">Posts</TabsTrigger>
-            </TabsList>
+          <div className="enhanced-dashboard-tabs">
+            <Tabs defaultValue="profile">
+              <TabsList className="enhanced-dashboard-tabs-list">
+                <TabsTrigger className="enhanced-dashboard-tab-trigger" value="profile">Profile</TabsTrigger>
+                <TabsTrigger className="enhanced-dashboard-tab-trigger" value="branches">Branches</TabsTrigger>
+                <TabsTrigger className="enhanced-dashboard-tab-trigger" value="donations">Donations</TabsTrigger>
+                <TabsTrigger className="enhanced-dashboard-tab-trigger" value="help">Help Requests</TabsTrigger>
+                <TabsTrigger className="enhanced-dashboard-tab-trigger" value="posts">Posts</TabsTrigger>
+              </TabsList>
 
-            {/* Profile Tab */}
-            <TabsContent value="profile">
-              <div className="grid md:grid-cols-3 gap-8">
-                <Card className="md:col-span-1">
-                  <CardHeader>
-                    <CardTitle>Charity Logo</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col items-center">
-                    <div className="w-48 h-48 rounded-full overflow-hidden mb-6">
-                      <img
-                        src={profilePhoto ? URL.createObjectURL(profilePhoto) : profileData?.profilePhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.profilePhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
-                        alt="Charity Logo"
-                        className="w-full h-full object-cover"
+              {/* Profile Tab */}
+              <TabsContent value="profile" className="enhanced-dashboard-tab-content">
+                <div className="grid md:grid-cols-3 gap-8">
+                  <Card className="md:col-span-1">
+                    <CardHeader>
+                      <CardTitle>Charity Logo</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center">
+                      <div className="w-48 h-48 rounded-full overflow-hidden mb-6">
+                        <img
+                          src={profilePhoto ? URL.createObjectURL(profilePhoto) : profileData?.profilePhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.profilePhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
+                          alt="Charity Logo"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfilePhotoChange}
+                        className="text-xs w-full text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-hope-orange file:text-white hover:file:bg-hope-dark-orange"
                       />
+                    </CardContent>
+                    <CardHeader>
+                      <CardTitle>Charity Wallpaper</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="w-full h-48 rounded-lg mb-6">
+                        <img
+                          src={wallpaperPhoto ? URL.createObjectURL(wallpaperPhoto) : profileData?.wallpaperPhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.wallpaperPhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
+                          alt="Charity Logo"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleWallpaperPhotoChange}
+                        className="text-xs w-full text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-hope-orange file:text-white hover:file:bg-hope-dark-orange"
+                      />
+                    </CardContent>
+                  </Card>
+
+                  <div className='w-full md:col-span-2 space-y-10'>
+                    <Card className="md:col-span-2">
+                      <CardHeader>
+                        <CardTitle>Charity Information</CardTitle>
+                        <CardDescription>Update your charity's details</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleProfileUpdate} className="space-y-5">
+                          <div>
+                            <label htmlFor="name" className="block mb-1 text-sm font-medium">Charity Name</label>
+                            <input
+                              id="name"
+                              type="text"
+                              value={profileData?.fullName}
+                              onChange={e => setProfileData({ ...profileData, fullName: e.target.value })}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            />
+                          </div>
+
+                          <div>
+                            <label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</label>
+                            <input
+                              id="email"
+                              type="email"
+                              value={profileData?.email}
+                              disabled
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            />
+                          </div>
+
+                          <div>
+                            <label htmlFor="phone" className="block mb-1 text-sm font-medium">Phone Number</label>
+                            <input
+                              id="phone"
+                              type="tel"
+                              value={profileData?.phoneNumber}
+                              onChange={e => setProfileData({ ...profileData, phoneNumber: e.target.value })}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            />
+                          </div>
+
+                          <div>
+                            <label htmlFor="address" className="block mb-1 text-sm font-medium">Main Address</label>
+                            <textarea
+                              id="address"
+                              rows={2}
+                              value={profileData?.address}
+                              onChange={e => setProfileData({ ...profileData, address: e.target.value })}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            ></textarea>
+                          </div>
+
+                          <div>
+                            <label htmlFor="description" className="block mb-1 text-sm font-medium">Description</label>
+                            <textarea
+                              id="description"
+                              rows={4}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            ></textarea>
+                          </div>
+
+                          <div className='w-full border-t border-gray-300 pt-5 flex justify-center'>
+                            <Button type="submit" className="px-20 bg-hope-orange hover:bg-hope-dark-orange">
+                              Save Changes
+                            </Button>
+                          </div>
+                        </form>
+                      </CardContent>
+                    </Card>
+                    {/* Card for Password Information */}
+                    <Card className="md:col-span-2">
+                      <CardHeader>
+                        <CardTitle>Change Password</CardTitle>
+                        <CardDescription>Update your Password</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handlePasswordSubmit(onSubmitPasswordChange)} className="space-y-4">
+                          <div>
+                            <label className="block mb-1 text-sm font-medium">Current Password</label>
+                            <input
+                              type="password"
+                              {...registerPassword('currentPassword')}
+                              className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'}`}
+                            />
+                            {passwordErrors.currentPassword && (
+                              <p className="text-red-500 text-sm mt-1">{passwordErrors.currentPassword.message}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block mb-1 text-sm font-medium">New Password</label>
+                            <input
+                              type="password"
+                              {...registerPassword('newPassword')}
+                              className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'}`}
+                            />
+                            {passwordErrors.newPassword && (
+                              <p className="text-red-500 text-sm mt-1">{passwordErrors.newPassword.message}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block mb-1 text-sm font-medium">Confirm New Password</label>
+                            <input
+                              type="password"
+                              {...registerPassword('confirmNewPassword')}
+                              className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.confirmNewPassword ? 'border-red-500' : 'border-gray-300'}`}
+                            />
+                            {passwordErrors.confirmNewPassword && (
+                              <p className="text-red-500 text-sm mt-1">{passwordErrors.confirmNewPassword.message}</p>
+                            )}
+                          </div>
+
+                          <Button type="submit" className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white">
+                            Change Password
+                          </Button>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Branches Tab */}
+              <TabsContent value="branches">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Charity Branches</CardTitle>
+                      <CardDescription>Manage your charity's locations</CardDescription>
                     </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfilePhotoChange}
-                      className="text-xs w-full text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-hope-orange file:text-white hover:file:bg-hope-dark-orange"
-                    />
-                  </CardContent>
-                  <CardHeader>
-                    <CardTitle>Charity Wallpaper</CardTitle>
+                    <Button onClick={() => handleBranchDialogOpen()} className="bg-hope-orange hover:bg-hope-dark-orange flex items-center gap-1">
+                      <Plus className="h-4 w-4" /> Add Branch
+                    </Button>
                   </CardHeader>
                   <CardContent>
-                    <div className="w-full h-48 rounded-lg mb-6">
-                      <img
-                        src={wallpaperPhoto ? URL.createObjectURL(wallpaperPhoto) : profileData?.wallpaperPhotoUrl ? `https://ma3ansawa.runasp.net/${profileData.wallpaperPhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
-                        alt="Charity Logo"
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {branches?.map((branch, idx) => (
+                        <Card key={idx}>
+                          <CardHeader className="pb-2">
+                            <div className="flex justify-between">
+                              <CardTitle>{branch?.address}</CardTitle>
+                              <div className="flex gap-2">
+                                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => { handleBranchDialogOpen(branch) }}>
+                                  <Edit className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleDeleteBranch(branch)}>
+                                  <Trash className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              <div className="flex items-start gap-2">
+                                <span>{branch?.description}</span>
+                              </div>
+                              <div>
+                                <strong className="text-sm">Phone:</strong> {branch?.phoneNumber}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleWallpaperPhotoChange}
-                      className="text-xs w-full text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-hope-orange file:text-white hover:file:bg-hope-dark-orange"
-                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Donation Requests Tab */}
+              <TabsContent value="donations">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Donation Requests</CardTitle>
+                    <CardDescription>Manage incoming donation requests</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Donor</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {donationRequests?.map((request) => (
+                          <TableRow key={request.id}>
+                            <TableCell>{request.id}</TableCell>
+                            <TableCell>{request.userName}</TableCell>
+                            <TableCell>{request.type}</TableCell>
+                            <TableCell>
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                                {request.status}
+                              </span>
+                            </TableCell>
+                            <TableCell>{request.createdAt}</TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button variant="outline" size="sm" onClick={() => handleDetailsDialogOpen(request, 'donation')}>
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {request.status === 'Pending' && (
+                                  <>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDonationAction(request.id, 'Approved')}
+                                      className="text-green-500 hover:text-green-700"
+                                    >
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDonationAction(request.id, 'Cancelled')}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Help Requests Tab */}
+              <TabsContent value="help">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Help Requests</CardTitle>
+                    <CardDescription>Manage assistance requests from individuals</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Requester</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {helpRequests.map((request) => (
+                          <TableRow key={request.id}>
+                            <TableCell>{request.id}</TableCell>
+                            <TableCell>{request.userName}</TableCell>
+                            <TableCell className="max-w-xs truncate">{request.description}</TableCell>
+                            <TableCell>
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                                {request.status}
+                              </span>
+                            </TableCell>
+                            <TableCell>{request.createdAt}</TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button variant="outline" size="sm" onClick={() => handleDetailsDialogOpen(request, 'helpRequest')}>
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {request.status === 'Pending' && (
+                                  <>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleHelpRequestAction(request.id, 'Approved')}
+                                      className="text-green-500 hover:text-green-700"
+                                    >
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleHelpRequestAction(request.id, 'Cancelled')}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Posts Tab */}
+              <TabsContent value="posts">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Create New Post</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleAddPost} className="space-y-4">
+                      <Textarea
+                        placeholder="What would you like to share with your supporters?"
+                        value={selectedPost?.content || ""}
+                        onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
+                        className="min-h-32"
+                      />
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="file"
+                          multiple
+                          onChange={(e) => {
+                            const files = e.target.files;
+                            if (files) {
+                              setPostImages(Array.from(files));
+                            }
+                          }}
+                        />
+                        <Button
+                          type="submit"
+                          className="bg-hope-orange hover:bg-hope-dark-orange"
+                          disabled={!selectedPost?.content.trim()}
+                          onClick={(e) => handleAddPost(e)}
+                        >
+                          Publish Post
+                        </Button>
+                      </div>
+                    </form>
                   </CardContent>
                 </Card>
 
-                <div className='w-full md:col-span-2 space-y-10'>
-                  <Card className="md:col-span-2">
-                    <CardHeader>
-                      <CardTitle>Charity Information</CardTitle>
-                      <CardDescription>Update your charity's details</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <form onSubmit={handleProfileUpdate} className="space-y-5">
-                        <div>
-                          <label htmlFor="name" className="block mb-1 text-sm font-medium">Charity Name</label>
-                          <input
-                            id="name"
-                            type="text"
-                            value={profileData?.fullName}
-                            onChange={e => setProfileData({ ...profileData, fullName: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
+                <div className="mt-8 space-y-6">
+                  <h3 className="text-xl font-semibold">Your Posts</h3>
 
-                        <div>
-                          <label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</label>
-                          <input
-                            id="email"
-                            type="email"
-                            value={profileData?.email}
-                            disabled
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="phone" className="block mb-1 text-sm font-medium">Phone Number</label>
-                          <input
-                            id="phone"
-                            type="tel"
-                            value={profileData?.phoneNumber}
-                            onChange={e => setProfileData({ ...profileData, phoneNumber: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="address" className="block mb-1 text-sm font-medium">Main Address</label>
-                          <textarea
-                            id="address"
-                            rows={2}
-                            value={profileData?.address}
-                            onChange={e => setProfileData({ ...profileData, address: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          ></textarea>
-                        </div>
-
-                        <div>
-                          <label htmlFor="description" className="block mb-1 text-sm font-medium">Description</label>
-                          <textarea
-                            id="description"
-                            rows={4}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          ></textarea>
-                        </div>
-
-                        <div className='w-full border-t border-gray-300 pt-5 flex justify-center'>
-                          <Button type="submit" className="px-20 bg-hope-orange hover:bg-hope-dark-orange">
-                            Save Changes
-                          </Button>
-                        </div>
-                      </form>
-                    </CardContent>
-                  </Card>
-                  {/* Card for Password Information */}
-                  <Card className="md:col-span-2">
-                    <CardHeader>
-                      <CardTitle>Change Password</CardTitle>
-                      <CardDescription>Update your Password</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <form onSubmit={handlePasswordSubmit(onSubmitPasswordChange)} className="space-y-4">
-                        <div>
-                          <label className="block mb-1 text-sm font-medium">Current Password</label>
-                          <input
-                            type="password"
-                            {...registerPassword('currentPassword')}
-                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'}`}
-                          />
-                          {passwordErrors.currentPassword && (
-                            <p className="text-red-500 text-sm mt-1">{passwordErrors.currentPassword.message}</p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block mb-1 text-sm font-medium">New Password</label>
-                          <input
-                            type="password"
-                            {...registerPassword('newPassword')}
-                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'}`}
-                          />
-                          {passwordErrors.newPassword && (
-                            <p className="text-red-500 text-sm mt-1">{passwordErrors.newPassword.message}</p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block mb-1 text-sm font-medium">Confirm New Password</label>
-                          <input
-                            type="password"
-                            {...registerPassword('confirmNewPassword')}
-                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.confirmNewPassword ? 'border-red-500' : 'border-gray-300'}`}
-                          />
-                          {passwordErrors.confirmNewPassword && (
-                            <p className="text-red-500 text-sm mt-1">{passwordErrors.confirmNewPassword.message}</p>
-                          )}
-                        </div>
-
-                        <Button type="submit" className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white">
-                          Change Password
-                        </Button>
-                      </form>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Branches Tab */}
-            <TabsContent value="branches">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Charity Branches</CardTitle>
-                    <CardDescription>Manage your charity's locations</CardDescription>
-                  </div>
-                  <Button onClick={() => handleBranchDialogOpen()} className="bg-hope-orange hover:bg-hope-dark-orange flex items-center gap-1">
-                    <Plus className="h-4 w-4" /> Add Branch
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {branches?.map((branch, idx) => (
-                      <Card key={idx}>
-                        <CardHeader className="pb-2">
-                          <div className="flex justify-between">
-                            <CardTitle>{branch?.address}</CardTitle>
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => { handleBranchDialogOpen(branch) }}>
-                                <Edit className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleDeleteBranch(branch)}>
-                                <Trash className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex items-start gap-2">
-                              <span>{branch?.description}</span>
+                  {posts?.map((post) => (
+                    <Card key={post.id}>
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full overflow-hidden">
+                              <img
+                                src={`https://ma3ansawa.runasp.net${profileData?.profilePhotoUrl}`}
+                                alt={profileData?.userName}
+                                className="w-full h-full object-contain"
+                              />
                             </div>
                             <div>
-                              <strong className="text-sm">Phone:</strong> {branch?.phoneNumber}
+                              <div className="font-semibold">{profileData?.userName}</div>
+                              <div className="text-xs text-gray-500">{post.createAt}</div>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Donation Requests Tab */}
-            <TabsContent value="donations">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Donation Requests</CardTitle>
-                  <CardDescription>Manage incoming donation requests</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Donor</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {donationRequests?.map((request) => (
-                        <TableRow key={request.id}>
-                          <TableCell>{request.id}</TableCell>
-                          <TableCell>{request.userName}</TableCell>
-                          <TableCell>{request.type}</TableCell>
-                          <TableCell>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                              {request.status}
-                            </span>
-                          </TableCell>
-                          <TableCell>{request.createdAt}</TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button variant="outline" size="sm" onClick={() => handleDetailsDialogOpen(request, 'donation')}>
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {request.status === 'Pending' && (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleDonationAction(request.id, 'Approved')}
-                                    className="text-green-500 hover:text-green-700"
-                                  >
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleDonationAction(request.id, 'Cancelled')}
-                                    className="text-red-500 hover:text-red-700"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Help Requests Tab */}
-            <TabsContent value="help">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Help Requests</CardTitle>
-                  <CardDescription>Manage assistance requests from individuals</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Requester</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {helpRequests.map((request) => (
-                        <TableRow key={request.id}>
-                          <TableCell>{request.id}</TableCell>
-                          <TableCell>{request.userName}</TableCell>
-                          <TableCell className="max-w-xs truncate">{request.description}</TableCell>
-                          <TableCell>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                              {request.status}
-                            </span>
-                          </TableCell>
-                          <TableCell>{request.createdAt}</TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button variant="outline" size="sm" onClick={() => handleDetailsDialogOpen(request, 'helpRequest')}>
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {request.status === 'Pending' && (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleHelpRequestAction(request.id, 'Approved')}
-                                    className="text-green-500 hover:text-green-700"
-                                  >
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleHelpRequestAction(request.id, 'Cancelled')}
-                                    className="text-red-500 hover:text-red-700"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Posts Tab */}
-            <TabsContent value="posts">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create New Post</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleAddPost} className="space-y-4">
-                    <Textarea
-                      placeholder="What would you like to share with your supporters?"
-                      value={selectedPost?.content || ""}
-                      onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
-                      className="min-h-32"
-                    />
-                    <div className="flex items-center gap-4">
-                      <input
-                        type="file"
-                        multiple
-                        onChange={(e) => {
-                          const files = e.target.files;
-                          if (files) {
-                            setPostImages(Array.from(files));
-                          }
-                        }}
-                      />
-                      <Button
-                        type="submit"
-                        className="bg-hope-orange hover:bg-hope-dark-orange"
-                        disabled={!selectedPost?.content.trim()}
-                        onClick={(e) => handleAddPost(e)}
-                      >
-                        Publish Post
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-
-              <div className="mt-8 space-y-6">
-                <h3 className="text-xl font-semibold">Your Posts</h3>
-
-                {posts?.map((post) => (
-                  <Card key={post.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full overflow-hidden">
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handlePostDialogOpen(post)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-red-500"
+                              onClick={() => handleDeletePost(post.id)}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="mb-4">{post.content}</p>
+                        {post.photos.length >= 2 ?
+                          <div className="slide-container">
+                            <Slide slidesToShow={1} infinite={false} canSwipe={false} autoplay={false}>
+                              {post.photos.map((url, index) => (
+                                <div key={index} className='w-full flex justify-center h-[20rem]'>
+                                  <img draggable={false} src={`https://ma3ansawa.runasp.net${url.imgName}`} alt="" className='object-cover' />
+                                </div>
+                              ))}
+                            </Slide>
+                          </div>
+                          :
+                          <>
                             <img
-                              src={`https://ma3ansawa.runasp.net${profileData?.profilePhotoUrl}`}
-                              alt={profileData?.userName}
-                              className="w-full h-full object-contain"
+                              src={`https://ma3ansawa.runasp.net${post.photos[0]?.imgName}`}
+                              alt="Post attachment"
+                              className='w-full max-h-[30rem] object-cover'
                             />
-                          </div>
-                          <div>
-                            <div className="font-semibold">{profileData?.userName}</div>
-                            <div className="text-xs text-gray-500">{post.createAt}</div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handlePostDialogOpen(post)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-500"
-                            onClick={() => handleDeletePost(post.id)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4">{post.content}</p>
-                      {post.photos.length >= 2 ?
-                        <div className="slide-container">
-                          <Slide slidesToShow={1} infinite={false} canSwipe={false} autoplay={false}>
-                            {post.photos.map((url, index) => (
-                              <div key={index} className='w-full flex justify-center h-[20rem]'>
-                                <img draggable={false} src={`https://ma3ansawa.runasp.net${url.imgName}`} alt="" className='object-cover' />
-                              </div>
-                            ))}
-                          </Slide>
-                        </div>
-                        :
-                        <>
-                          <img
-                            src={`https://ma3ansawa.runasp.net${post.photos[0]?.imgName}`}
-                            alt="Post attachment"
-                            className='w-full max-h-[30rem] object-cover'
-                          />
-                        </>
-                      }
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+                          </>
+                        }
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
 
@@ -1094,7 +1122,7 @@ const CharityDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </MainLayout >
+    </MainLayout>
   );
 };
 

@@ -157,269 +157,296 @@ const UserDashboard = () => {
 
   return (
     <MainLayout>
-      <div className="bg-hope-gray py-8">
+      <div className="enhanced-dashboard-container">
+        {/* Enhanced Dashboard Header */}
+        <div className="enhanced-dashboard-header">
+          <div className="container mx-auto px-4">
+            <h1 className="enhanced-dashboard-title">User Dashboard</h1>
+            <p className="enhanced-dashboard-subtitle">Manage your profile, donations, and help requests</p>
+          </div>
+        </div>
+
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-hope-dark-gray mb-6">User Dashboard</h1>
+          {/* Enhanced Dashboard Stats */}
+          <div className="enhanced-dashboard-stat-grid">
+            <div className="enhanced-dashboard-stat-card">
+              <span className="enhanced-dashboard-stat-number">{donationRequests.length}</span>
+              <span className="enhanced-dashboard-stat-label">Donation Requests</span>
+            </div>
+            <div className="enhanced-dashboard-stat-card">
+              <span className="enhanced-dashboard-stat-number">{useHelpRequests.length}</span>
+              <span className="enhanced-dashboard-stat-label">Help Requests</span>
+            </div>
+            <div className="enhanced-dashboard-stat-card">
+              <span className="enhanced-dashboard-stat-number">
+                {donationRequests.filter(d => d.status === 'Approved').length}
+              </span>
+              <span className="enhanced-dashboard-stat-label">Approved Donations</span>
+            </div>
+          </div>
 
-          <Tabs defaultValue="profile">
-            <TabsList className="mb-8 bg-white flex justify-around">
-              <TabsTrigger className='data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none' value="profile">Profile</TabsTrigger>
-              <TabsTrigger className='data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none' value="donations">Donation Requests</TabsTrigger>
-              <TabsTrigger className='data-[state=active]:text-hope-orange data-[state=active]:font-semibold rounded-none data-[state=active]:lg:border-b-2 data-[state=active]:border-b border-hope-orange data-[state=active]:lg:text-lg data-[state=active]:shadow-none' value="help">Help Requests</TabsTrigger>
-            </TabsList>
+          <div className="enhanced-dashboard-tabs">
+            <Tabs defaultValue="profile">
+              <TabsList className="enhanced-dashboard-tabs-list">
+                <TabsTrigger className="enhanced-dashboard-tab-trigger" value="profile">Profile</TabsTrigger>
+                <TabsTrigger className="enhanced-dashboard-tab-trigger" value="donations">Donation Requests</TabsTrigger>
+                <TabsTrigger className="enhanced-dashboard-tab-trigger" value="help">Help Requests</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="profile">
-              <div className="grid md:grid-cols-3 gap-8">
-                <Card className="md:col-span-1">
+              <TabsContent value="profile" className="enhanced-dashboard-tab-content">
+                <div className="grid md:grid-cols-3 gap-8">
+                  <Card className="md:col-span-1">
+                    <CardHeader>
+                      <CardTitle>Profile Picture</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center">
+                      <img
+                        src={profilePhoto ? URL.createObjectURL(profilePhoto) : profileData?.profilePhotoUrl ? `https://ma3ansawa.runasp.net${profileData?.profilePhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
+                        alt="Profile"
+                        className="w-3/4 object-cover rounded-full"
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfilePhotoChange}
+                        className="text-xs w-full text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-hope-orange mt-10 file:text-white hover:file:bg-hope-dark-orange"
+                      />
+                    </CardContent>
+                  </Card>
+
+                  <div className='w-full md:col-span-2 space-y-10'>
+                    {/* Card for Profile Information */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Personal Information</CardTitle>
+                        <CardDescription>Update your personal details</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleProfileUpdate} className="space-y-5">
+                          <div>
+                            <label htmlFor="fullName" className="block mb-1 text-sm font-medium">Full Name</label>
+                            <input
+                              id="fullName"
+                              type="text"
+                              value={profileData?.fullName}
+                              onChange={e => setProfileData({ ...profileData, fullName: e.target.value })}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            />
+                          </div>
+
+                          <div>
+                            <label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</label>
+                            <input
+                              id="email"
+                              type="email"
+                              value={profileData?.email}
+                              disabled
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            />
+                          </div>
+
+                          <div>
+                            <label htmlFor="phone" className="block mb-1 text-sm font-medium">Phone Number</label>
+                            <input
+                              id="phone"
+                              type="tel"
+                              value={profileData?.phoneNumber}
+                              onChange={e => setProfileData({ ...profileData, phoneNumber: e.target.value })}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            />
+                          </div>
+
+                          <div>
+                            <label htmlFor="address" className="block mb-1 text-sm font-medium">Address</label>
+                            <textarea
+                              id="address"
+                              rows={3}
+                              value={profileData?.address}
+                              onChange={e => setProfileData({ ...profileData, address: e.target.value })}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
+                            ></textarea>
+                          </div>
+                          <div>
+                            <Button type="submit" className="bg-hope-orange hover:bg-hope-dark-orange" onClick={handleProfileUpdate}>
+                              Save Changes
+                            </Button>
+                          </div>
+                        </form>
+                      </CardContent>
+                    </Card>
+
+                    {/* Card for Password Information */}
+                    <Card className="md:col-span-2">
+                      <CardHeader>
+                        <CardTitle>Change Password</CardTitle>
+                        <CardDescription>Update your Password</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handlePasswordSubmit(onSubmitPasswordChange)} className="space-y-4">
+                          <div>
+                            <label className="block mb-1 text-sm font-medium">Current Password</label>
+                            <input
+                              type="password"
+                              {...registerPassword('currentPassword')}
+                              className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'}`}
+                            />
+                            {passwordErrors.currentPassword && (
+                              <p className="text-red-500 text-sm mt-1">{passwordErrors.currentPassword.message}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block mb-1 text-sm font-medium">New Password</label>
+                            <input
+                              type="password"
+                              {...registerPassword('newPassword')}
+                              className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'}`}
+                            />
+                            {passwordErrors.newPassword && (
+                              <p className="text-red-500 text-sm mt-1">{passwordErrors.newPassword.message}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block mb-1 text-sm font-medium">Confirm New Password</label>
+                            <input
+                              type="password"
+                              {...registerPassword('confirmNewPassword')}
+                              className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.confirmNewPassword ? 'border-red-500' : 'border-gray-300'}`}
+                            />
+                            {passwordErrors.confirmNewPassword && (
+                              <p className="text-red-500 text-sm mt-1">{passwordErrors.confirmNewPassword.message}</p>
+                            )}
+                          </div>
+
+                          <Button type="submit" className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white">
+                            Change Password
+                          </Button>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="donations">
+                <Card>
                   <CardHeader>
-                    <CardTitle>Profile Picture</CardTitle>
+                    <CardTitle>Your Donation Requests</CardTitle>
+                    <CardDescription>Track the status of your donation requests</CardDescription>
                   </CardHeader>
-                  <CardContent className="flex flex-col items-center">
-                    <img
-                      src={profilePhoto ? URL.createObjectURL(profilePhoto) : profileData?.profilePhotoUrl ? `https://ma3ansawa.runasp.net${profileData?.profilePhotoUrl}` : `https://ui-avatars.com/api/?name=${profileData?.userName}`}
-                      alt="Profile"
-                      className="w-3/4 object-cover rounded-full"
-                    />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfilePhotoChange}
-                      className="text-xs w-full text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-hope-orange mt-10 file:text-white hover:file:bg-hope-dark-orange"
-                    />
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Charity</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {donationRequests?.map((request) => (
+                          <TableRow key={request.id}>
+                            <TableCell>{request.id}</TableCell>
+                            <TableCell>{request.charityName}</TableCell>
+                            <TableCell>{request.description ? request.description : <p className='text-gray-400 text-lg font-bold text-center'>-</p>}</TableCell>
+                            <TableCell>{request.type}</TableCell>
+                            <TableCell className='text-center'>{request.amount ? request.amount : <p className='text-gray-400 text-lg font-bold text-center'>-</p>}</TableCell>
+                            <TableCell>
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                                {request.status}
+                              </span>
+                            </TableCell>
+                            <TableCell>{request.createdAt}</TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button variant="outline" size="sm" onClick={() => { setSelectedDonation(request); setSelectedHelpRequest(null); handleOpenDialog(true); }}>
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {request.status === 'Pending' && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleCancelRequest(request.id, "donate")}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    Cancel
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </CardContent>
                 </Card>
+              </TabsContent>
 
-                <div className='w-full md:col-span-2 space-y-10'>
-                  {/* Card for Profile Information */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Personal Information</CardTitle>
-                      <CardDescription>Update your personal details</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <form onSubmit={handleProfileUpdate} className="space-y-5">
-                        <div>
-                          <label htmlFor="fullName" className="block mb-1 text-sm font-medium">Full Name</label>
-                          <input
-                            id="fullName"
-                            type="text"
-                            value={profileData?.fullName}
-                            onChange={e => setProfileData({ ...profileData, fullName: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</label>
-                          <input
-                            id="email"
-                            type="email"
-                            value={profileData?.email}
-                            disabled
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="phone" className="block mb-1 text-sm font-medium">Phone Number</label>
-                          <input
-                            id="phone"
-                            type="tel"
-                            value={profileData?.phoneNumber}
-                            onChange={e => setProfileData({ ...profileData, phoneNumber: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="address" className="block mb-1 text-sm font-medium">Address</label>
-                          <textarea
-                            id="address"
-                            rows={3}
-                            value={profileData?.address}
-                            onChange={e => setProfileData({ ...profileData, address: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-hope-orange/50"
-                          ></textarea>
-                        </div>
-                        <div>
-                          <Button type="submit" className="bg-hope-orange hover:bg-hope-dark-orange" onClick={handleProfileUpdate}>
-                            Save Changes
-                          </Button>
-                        </div>
-                      </form>
-                    </CardContent>
-                  </Card>
-
-                  {/* Card for Password Information */}
-                  <Card className="md:col-span-2">
-                    <CardHeader>
-                      <CardTitle>Change Password</CardTitle>
-                      <CardDescription>Update your Password</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <form onSubmit={handlePasswordSubmit(onSubmitPasswordChange)} className="space-y-4">
-                        <div>
-                          <label className="block mb-1 text-sm font-medium">Current Password</label>
-                          <input
-                            type="password"
-                            {...registerPassword('currentPassword')}
-                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'}`}
-                          />
-                          {passwordErrors.currentPassword && (
-                            <p className="text-red-500 text-sm mt-1">{passwordErrors.currentPassword.message}</p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block mb-1 text-sm font-medium">New Password</label>
-                          <input
-                            type="password"
-                            {...registerPassword('newPassword')}
-                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'}`}
-                          />
-                          {passwordErrors.newPassword && (
-                            <p className="text-red-500 text-sm mt-1">{passwordErrors.newPassword.message}</p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block mb-1 text-sm font-medium">Confirm New Password</label>
-                          <input
-                            type="password"
-                            {...registerPassword('confirmNewPassword')}
-                            className={`w-full px-4 py-2 rounded-lg border ${passwordErrors.confirmNewPassword ? 'border-red-500' : 'border-gray-300'}`}
-                          />
-                          {passwordErrors.confirmNewPassword && (
-                            <p className="text-red-500 text-sm mt-1">{passwordErrors.confirmNewPassword.message}</p>
-                          )}
-                        </div>
-
-                        <Button type="submit" className="w-full bg-hope-orange hover:bg-hope-dark-orange text-white">
-                          Change Password
-                        </Button>
-                      </form>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="donations">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Your Donation Requests</CardTitle>
-                  <CardDescription>Track the status of your donation requests</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Charity</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {donationRequests?.map((request) => (
-                        <TableRow key={request.id}>
-                          <TableCell>{request.id}</TableCell>
-                          <TableCell>{request.charityName}</TableCell>
-                          <TableCell>{request.description ? request.description : <p className='text-gray-400 text-lg font-bold text-center'>-</p>}</TableCell>
-                          <TableCell>{request.type}</TableCell>
-                          <TableCell className='text-center'>{request.amount ? request.amount : <p className='text-gray-400 text-lg font-bold text-center'>-</p>}</TableCell>
-                          <TableCell>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                              {request.status}
-                            </span>
-                          </TableCell>
-                          <TableCell>{request.createdAt}</TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button variant="outline" size="sm" onClick={() => { setSelectedDonation(request); setSelectedHelpRequest(null); handleOpenDialog(true); }}>
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {request.status === 'Pending' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleCancelRequest(request.id, "donate")}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  Cancel
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
+              <TabsContent value="help">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Your Help Requests</CardTitle>
+                    <CardDescription>Track the status of your requests for assistance</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Charity</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="help">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Your Help Requests</CardTitle>
-                  <CardDescription>Track the status of your requests for assistance</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Charity</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {useHelpRequests?.map((request) => (
-                        <TableRow key={request.id}>
-                          <TableCell>{request.id}</TableCell>
-                          <TableCell>{request.charityName}</TableCell>
-                          <TableCell>{request.description}</TableCell>
-                          <TableCell>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                              {request.status}
-                            </span>
-                          </TableCell>
-                          <TableCell>{request.createdAt}</TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button variant="outline" size="sm" onClick={() => { setSelectedHelpRequest(request); setSelectedDonation(null); handleOpenDialog(true); }}>
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {request.status === 'Pending' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleCancelRequest(request.id, "help")}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  Cancel
+                      </TableHeader>
+                      <TableBody>
+                        {useHelpRequests?.map((request) => (
+                          <TableRow key={request.id}>
+                            <TableCell>{request.id}</TableCell>
+                            <TableCell>{request.charityName}</TableCell>
+                            <TableCell>{request.description}</TableCell>
+                            <TableCell>
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                                {request.status}
+                              </span>
+                            </TableCell>
+                            <TableCell>{request.createdAt}</TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button variant="outline" size="sm" onClick={() => { setSelectedHelpRequest(request); setSelectedDonation(null); handleOpenDialog(true); }}>
+                                  <Eye className="h-4 w-4" />
                                 </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                                {request.status === 'Pending' && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleCancelRequest(request.id, "help")}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    Cancel
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
+
       {/* View Dialog for Charity/User/Report details */}
       <Dialog open={viewDialogOpen} onOpenChange={handleOpenDialog} >
         <DialogContent className="sm:max-w-md">
@@ -479,7 +506,7 @@ const UserDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </MainLayout >
+    </MainLayout>
   );
 };
 
