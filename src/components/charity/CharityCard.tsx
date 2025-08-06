@@ -53,7 +53,7 @@ const CharityCard: React.FC<{ charity: IHomeCharities, className?: string, style
           <div className="space-y-3">
             <Link
               to={`/charity/${charity.userName}`}
-              className="block w-full text-center bg-hope-orange-500 hover:bg-hope-orange-600 text-black py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
+              className="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
             >
               View Profile
             </Link>
