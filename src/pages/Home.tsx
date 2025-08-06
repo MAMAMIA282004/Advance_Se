@@ -299,7 +299,7 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row justify-center gap-6 mb-12">
               <Button
                 onClick={() => navigate('/signup')}
-                className="bg-white text-hope-orange-500 hover:bg-hope-orange-50 px-8 py-4 text-lg font-semibold rounded-full shadow-lg transform hover:scale-105 transition-all duration-300"
+                className="bg-white text-orange-500 hover:bg-hope-orange-50 px-8 py-4 text-lg font-semibold rounded-full shadow-lg transform hover:scale-105 transition-all duration-300"
               >
                 <Users className="w-6 h-6 mr-2" />
                 Sign Up Now
